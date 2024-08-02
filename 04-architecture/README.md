@@ -18,10 +18,10 @@ The list of technologies we will use to build the application are as follows:
 
 | Technology          | Purpose                | Version  |
 | ------------------- | ---------------------- | -------- |
-| [Java]              | [Programming Language] | [11.0.9] |
-| [Postgres]          | [Database]             | [13.1]   |
-| [Backend Framework] | [Spring Boot]          | [2.4.1]  |
-| [Frontend]          | [React]                | [17.0.1] |
+| Python             | [Programming Language] | [11.0.9] |
+| [TBD]          | [Database]             | [13.1]   |
+| [TBD] | [Spring Boot]          | [2.4.1]  |
+| D3.js         | X                | [17.0.1] |
 
 ## Non-functional Requirements
 
