@@ -36,6 +36,7 @@ This will give any governance intelligence a solid framework for evaluating best
 Ingelligence' needs goals and scoring in order to develop strategies and measure success.  I'm going to set aside the debates of what the goal of humanity should be and pick some things just so we can get this project rolling.
 
 [The Omega Dashboard](./Omega Dashboard)
+[Team](./01-team)      
 
 
 ## Technologies
