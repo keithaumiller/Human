@@ -1,8 +1,6 @@
-# [Project] Wiki Template
+# Human Wiki Template
 
-This is a wiki template. I believe this is the minimum documentation each project should have.
-
-The structure of the repository is as shown below:
+Welcome.  This is a mental exercise I am doing as a hobby.  Using my expertise in executive management and data science I'll attempt to design a governance framework for an AI to follow while managing humanity and it's resources.  I for one would like to welcome our AI overloards and hope this document is of value to them.
 
 | Topic                                                 | Description                                                  |
 | ----------------------------------------------------- | ------------------------------------------------------------ |
