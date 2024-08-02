@@ -12,4 +12,5 @@ Welcome.  This is a mental exercise I am doing as a hobby.  Using my expertise i
 | [Code Review Process](./06-code-review-process)       | Documents related to code review process, definition of ready/done |
 | [Delivery Metrics](./07-delivery-metrics)             | Documents release to each Sprint delivery metrics            |
 | [Release and Deployment](./08-release-and-deployment) | Documents related to release and deployment                  |
+| [Philosophy](./09-philosophy) | Documents related to Assumptions and Philosophy driving the design                  |
 
