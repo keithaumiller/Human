@@ -4,7 +4,7 @@ Welcome.  This is a mental exercise I am doing as a hobby and is as ambitioius a
 
 Organizations that don't leverage Artificial intellgence automation will lose to those that do.  It is a historical fact that cultures that dont' adopt automation and power technologies eventually lose out to those that do.  I think the concensus of futurists is that the incorporation of Artificial Intelligence at all levels of society is inevitable and already well on its way.  As the technology grows and improves, special interrest groups will each need their own governance AI to think for their institutions.  If they don't, they will be swallowed or forced out of competition by those who are more suited.
 
-This AI is intended to play the roal of a President, Dictator, King, Emperor, CEO, or whatever title of the individual who sits at the top of your organization has.
+This AI is intended to play the roal of a President, Dictator, King, Emperor, CEO, or whatever title of the individual who sits at the top of your organization has.  This is a "Leadership" AI.
 
 I will be building progressively more sophisticated algorithms that are nested and feed into the forecasting capabilities at the top level.
 
