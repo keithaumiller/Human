@@ -1,10 +1,10 @@
 # [Project] Software Architecture
 
-We plan to build the application using [Architecture] style. 
+We plan to build the application using a Geospatial centered architectural style. We are placing humanity at the center of the objective functions.  We will attempt to tie all other branches of science towards the goals laid out by humanitarian goals.
 
 ## Architecture Diagram
 
-![](architecture.png)
+##![](architecture.png)
 
 > We recommend building architecture using [Draw.io](https://app.diagrams.net/). Draw.io also has a desktop application.
 
