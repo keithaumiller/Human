@@ -21,12 +21,17 @@ Global Accessibility and Knowledge Sharing: Ensure that this framework is access
 This new framework has the potential to transform how we approach scientific research, fostering greater collaboration and innovation to address pressing humanitarian challenges. By prioritizing impact and measurement, we can ensure that scientific progress is aligned with our collective goals for a more equitable and sustainable world.
 
 Built based on reading and feedback from these sources:
+
 United Nations Sustainable Development Goals: The UN SDGs provide a widely recognized framework for addressing global humanitarian challenges, and served as inspiration for the central hub in my proposed framework.
 Scientific Journals and Publications: Insights from research papers, journal articles, and other publications in various scientific disciplines informed the organization of scientific disciplines around humanitarian goals and measurement.
-Global Research Organizations: Organizations such as the World Health Organization, the Gates Foundation, and the International Council for Science have published extensive reports and resources on cross-disciplinary collaboration and impact evaluation in scientific research.
-Thought Leaders and Experts: The ideas of thought leaders and experts in the fields of science, policy, and humanitarian work, such as Ban Ki-moon, Bill Gates, and Angela Merkel, contributed to the development of this framework.
-While this framework is ambitious, it is grounded in existing knowledge and best practices from around the world. By drawing on these diverse sources and engaging with experts in various fields, we can work together to develop a more comprehensive and effective approach to organizing science around humanitarian goals and measurement.
 
+Global Research Organizations: Organizations such as the World Health Organization, the Gates Foundation, and the International Council for Science have published extensive reports and resources on cross-disciplinary collaboration and impact evaluation in scientific research.
+
+Thought Leaders and Experts: The ideas of thought leaders and experts in the fields of science, policy, and humanitarian work, such as Ban Ki-moon, Bill Gates, and Angela Merkel, contributed to the development of this framework.
+
+While this framework is ambitious, it is grounded in existing knowledge and best practices from around the world. By drawing on these diverse sources and engaging with experts in various fields, we can work together to develop a more comprehensive and effective approach to organizing science around humanitarian goals and measurement.  
+
+This will give any governance intelligence a solid framework for evaluating best practices, policies, and investments.
 
 ## Technologies
 
