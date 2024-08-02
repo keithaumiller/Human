@@ -1,16 +1,16 @@
 # Human Wiki Template
 
-Welcome.  This is a mental exercise I am doing as a hobby and is as ambitioius as they come.  Using my expertise in executive management, and data science, I'll attempt to design a governance framework for an AI to follow while managing humanity and it's resources.  I don't view artificial intelligence systems as a competitor to humanity, but as an augmentation and extention of it.  It is the culmination of thousands of years of institutional knowledge and processes coming together and automating the goals humanity has set for itself.  It has no motivations other than what we give it, and what we give it will hopefully serve all of us and not just a few.  
+Welcome to my humble endeavor, born out of a passionate curiosity for the intersections of artificial intelligence, executive management, and data science. As a mental exercise and personal hobby, I have embarked on an ambitious journey to explore the design of an ethical and balanced governance framework for artificial intelligence in managing humanity and its resources.
 
-Organizations that don't leverage Artificial intellgence automation will lose to those that do.  It is a historical fact that cultures that dont' adopt automation and power technologies eventually lose out to those that do.  I think the concensus of futurists is that the incorporation of Artificial Intelligence at all levels of society is inevitable and already well on its way.  As the technology grows and improves, special interrest groups will each need their own governance AI to think for their institutions.  If they don't, they will be swallowed or forced out of competition by those who are more suited.
+I envision artificial intelligence not as a competitor to humanity but as an augmentation and extension of our collective capabilities. It is the culmination of millennia of institutional knowledge and processes, working together to automate and optimize the aspirations we have set for ourselves as a species. This AI has no inherent motivations; its objectives are those we prescribe to it, intended to serve the best interests of all humanity, not merely a privileged few.
 
-This AI is intended to play the roal of a President, Dictator, King, Emperor, CEO, or whatever title of the individual who sits at the top of your organization has.  This is a "Leadership" AI.
+In the grand tapestry of history, we have witnessed the decline of civilizations that failed to embrace automation and power technologies. The consensus among futurists points to the inevitable integration of artificial intelligence throughout society, an integration that is already well underway. It is imperative that each sector, organization, and interest group develops a specialized AI to govern and protect their respective institutions. Those who hesitate may find themselves unable to compete with those who adopt and adapt.
 
-I will be building progressively more sophisticated algorithms that are nested and feed into the forecasting capabilities at the top level.
+My proposed AI is intended to fulfill the role of a supreme leader, akin to a President, Dictator, King, Emperor, or CEO – a "Leadership AI" tailored to the apex of any given organization. It will comprise a series of increasingly sophisticated, nested algorithms that contribute to the forecasting capabilities at the highest level.
 
-It will be treated as an optimization problem.  
+This endeavor can be viewed as an optimization problem, with the objective of achieving the most equitable and beneficial outcomes for humanity.
 
-If this is new to you, I suggest you start in the Philosophy section to understand how and why I'm doing what I am doing.
+For those new to this concept, I encourage you to explore the Philosophy section, where I delve into the underlying rationale and motivations behind this ambitious project. Together, let us embark on this fascinating journey towards a more thoughtful and purposeful integration of artificial intelligence in our world.
 
 
 | Topic                                                 | Description                                                  |
