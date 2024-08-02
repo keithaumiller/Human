@@ -2,6 +2,8 @@
 
 Welcome to [Project]! We're excited to have you and hope you'll find these resources helpful.
 
+There isn't anything here yet since I'm just starting to organize my ideas.
+
 Onboarding resources:
 
 | Doc | Overview |
