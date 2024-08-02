@@ -6,13 +6,13 @@ Please specify following team details:
 
 | Role               | Name   | Email   |
 | ------------------ | ------ | ------- |
-| Delivery Manager   | [Name] | [Email] |
-| Software Architect | [Name] | [Email] |
-| Product Owner      | [Name] | [Email] |
-| Scrum Master       | [Name] | [Email] |
-| Developer          | [Name] | [Email] |
-| Developer          | [Name] | [Email] |
-| Tester             | [Name] | [Email] |
+| Delivery Manager   | Keith Aumiller | keith.aumiller@stlouisintegration.com |
+| Software Architect | [TBD] | [Email] |  
+| Product Owner      | [TBD] | [Email] |
+| Scrum Master       | [TBD] | [Email] |
+| Developer          | [TBD] | [Email] |
+| Developer          | [TBD] | [Email] |
+| Tester             | [TBD] | [Email] |
 
 ## Responsibilities
 
