@@ -12,4 +12,5 @@ General strategy
 1. Define clear goals
 2. Define clear KPIs at the top and work backwards
 3. Establish what algorithms, sensors, metrics, etc help to improve the overall forecast and which don't
-4. Leverage new research as it emerges 
+4. Leverage new research as it emerges
+5. Constantly be updating and linking to new data sources for longitudinal data that can improve the forecast of these indexes.  
