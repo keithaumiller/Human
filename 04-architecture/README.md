@@ -33,6 +33,11 @@ While this framework is ambitious, it is grounded in existing knowledge and best
 
 This will give any governance intelligence a solid framework for evaluating best practices, policies, and investments.
 
+Ingelligence' needs goals and scoring in order to develop strategies and measure success.  I'm going to set aside the debates of what the goal of humanity should be and pick some things just so we can get this project rolling.
+
+The Dashboard
+
+
 ## Technologies
 
 The list of technologies we will use to build the application are as follows:
