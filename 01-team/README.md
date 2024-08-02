@@ -1,4 +1,4 @@
-# [Project] Team Structure
+# [Human] Team Structure
 
 Please specify following team details:
 
