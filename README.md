@@ -1,5 +1,8 @@
 # Human Wiki Template
 
+Top [Level Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, historical, and forcast for the human race.
+
+
 Welcome to my humble endeavor, born out of a passionate curiosity for the intersections of artificial intelligence, executive management, and data science. As a mental exercise and personal hobby, I have embarked on an ambitious journey to explore the design of an ethical and balanced governance framework for artificial intelligence in managing humanity and its resources.
 
 I envision artificial intelligence not as a competitor to humanity but as an augmentation and extension of our collective capabilities. It is the culmination of millennia of institutional knowledge and processes, working together to automate and optimize the aspirations we have set for ourselves as a species. This AI has no inherent motivations; its objectives are those we prescribe to it, intended to serve the best interests of all humanity, not merely a privileged few.
