@@ -1,6 +1,6 @@
 # Human Wiki Template
 
-Top [Level Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, historical, and forcast for the human race.
+Top Level [Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, historical, and forcast for the human race.
 
 
 Welcome to my humble endeavor, born out of a passionate curiosity for the intersections of artificial intelligence, executive management, and data science. As a mental exercise and personal hobby, I have embarked on an ambitious journey to explore the design of an ethical and balanced governance framework for artificial intelligence in managing humanity and its resources.
