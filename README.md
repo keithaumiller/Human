@@ -1,12 +1,12 @@
 # Human Wiki Template
 
-Top Level [Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, historical, and forcast for the human race.
-
-My proposed method is intended to fulfill the role of leader.  "Leadership AI" tailored to the apex of any given organization. It will comprise a series of increasingly sophisticated, nested algorithms that contribute to the forecasting capabilities for the primary metrics.
+Top Level [Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, historical, and forcast for the human race Success.
 
 Leadership is an optimization problem, this method is intended to achieve the most equitable and beneficial outcomes for humanity.
 
 For those new to Artificial intelligence methodology and architecture, I encourage you to explore the Philosophy section. Lets work towards a more thoughtful and purposeful integration of artificial intelligence in the executive functioning of our world.
+
+My proposed method is intended to fulfill the role of an automated Leader.  "Leadership AI" tailored to the apex of any given organization. It will comprise a series of increasingly sophisticated, nested algorithms that contribute to the forecasting capabilities for the primary metrics.
 
 
 | Topic                                                 | Description                                                  |
