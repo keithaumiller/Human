@@ -12,7 +12,7 @@ Artificial intelligence is not a competitor to humanity but as an augmentation a
 
 The consensus among futurists points to the inevitable integration of artificial intelligence throughout society, an integration that is already well underway. It is imperative that each sector, organization, and interest group develops a specialized AI to govern and protect their respective institutions. Those who hesitate may find themselves unable to compete with those who adopt and adapt.
 
-![How to build ana automated leader](./howtoautomatealeader.md)
+[How to build an automated leader](./howtoautomatealeader.md)
 
 The Process
 ![Data Science Process Flow](./DSprocessflow.png)   
