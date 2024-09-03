@@ -11,5 +11,7 @@ Only by creating a model for forecasting outcomes and simulating scenarios can w
 I expect that a framework similar to this will eventually be adapted with slightly different weights or priorities by different organizations.  I intend to keep this one as neutral and fair to all interrests as possible and attempt to keep the focus on all of humanities survival, expansion, and happiness, not a special interrest groups.
 
 The Process
+![Data Science Process Flow](./DSprocessflow.png)   
 
-![alt text](./hierarchy-of-needs-768x516.jpg)   
+A Guiding Data Science Principle
+![Data Science Hierarchy of Needs](./hierarchy-of-needs-768x516.jpg)   
