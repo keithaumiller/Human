@@ -1,14 +1,12 @@
 # Human Software Architecture
 
-We plan to build the application using a Geospatial centered architectural style. We are placing humanity at the center of the objective functions.  We will attempt to tie all other branches of science towards the goals laid out by humanitarian goals.
+We plan to build the application using a Geospatial centered architecture. We are placing humanity at the center of the objective functions.  We will attempt to tie all other branches of science towards the goals laid out by humanitarian goals.
 
-With the help of LLMs I've started to establish a structure
-
-Creating a new framework for organizing all scientific knowledge and research around humanitarian goals and measurement would require a radical shift in how we currently approach scientific disciplines. Here's a potential way to structure this new system:
+Creating a new framework for organizing all scientific knowledge and research around humanitarian goals and measurement would require a radical shift in how we currently approach scientific disciplines. Here's a potential way to structure this new system.
 
 Central Hub: At the core of this framework, we would establish a central hub that houses the primary humanitarian goals and metrics. These would be based on existing frameworks like the United Nations Sustainable Development Goals (SDGs) and other widely recognized humanitarian indicators.
 
-Spokes of Scientific Disciplines: Radiating out from this central hub would be various scientific disciplines, organized according to their relevance to the humanitarian goals and metrics. Each scientific discipline would be evaluated based on its potential to contribute to the achievement of these goals and the refinement of measurement tools.
+Spokes of Scientific Disciplines: Radiating out from this central hub will be organized according to their relevance to the humanitarian goals and metrics. Each scientific discipline would be evaluated based on its potential to contribute to the achievement of these goals and the refinement of measurement tools.
 
 Cross-disciplinary Collaboration: Encourage cross-disciplinary collaboration among scientists and researchers to address complex humanitarian challenges. This could be facilitated through joint research projects, conferences, and shared resources that bring together experts from diverse fields to develop innovative solutions.
 
