@@ -24,4 +24,4 @@ For those new to Artificial intelligence methodology and architecture, I encoura
 | [Delivery Metrics](./07-delivery-metrics)             | Documents release to each Sprint delivery metrics            |
 | [Release and Deployment](./08-release-and-deployment) | Documents related to release and deployment                  |
 | [Philosophy](./09-Philosophy) | Documents related to Assumptions and Philosophy driving the design                  |
-| [Roadmap](./10-Roadmap) | Documents related to Assumptions and Philosophy driving the design                  |
+| [Roadmap](./10-Roadmap) | Documents related to Stepping stones to get to a progressivley better leader                  |
