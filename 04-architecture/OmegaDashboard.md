@@ -16,6 +16,13 @@ Quality of life index Over time(20) - Much debate I'm sure.
 
 Population over time https://ourworldindata.org/population-sources
 1. First round will forecast out 100 years utilizing the Meta Prophet algorithtm - https://facebook.github.io/prophet
-2. Second round will be a multivariate version that incoporates other features that are available as they are found to add accuracy to the top level -   
+2. Second round will be a multivariate version that incoporates other features that are available as they are found to add accuracy to the top level
+3. These will all need to be calculated based on an H3 geolocation function so that they can be tied to all other metrics that are also tiable to a geolocation
+4. This will allow automation of all testing and incorporation of new sources of data over time.
+5. If a metric is highly correlated with the ability to forecast population, it will provide a good insight on how to increase or decreate population in an area.
+
+Quality of life index over time.  https://worldpopulationreview.com/country-rankings/standard-of-living-by-country
+1. There is a lot of debate and constantly changing definitions.  Different components
+
 
 
