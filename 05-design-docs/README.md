@@ -6,6 +6,6 @@ This folder is for storing any design document that you will create while develo
 
 | Document                                  | Details                                                   | Status                     |
 | ----------------------------------------- | --------------------------------------------------------- | -------------------------- |
-| [Design Document Template](./template.md) | A template for documenting design for a technical problem | <WIP/Implemented/Archived> |
-| [Top Level Design](./template.md) | Top Level design - Start of the yellow brick road | <WIP/Implemented/Archived> |
+| [Design Document Template](./template.md) | A template for documenting design for a technical problem | Template |
+| [Top Level Design](./template.md) | Top Level design - Start of the yellow brick road | Live |
 
