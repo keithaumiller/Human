@@ -1,28 +1,38 @@
-# [Title] Design Document
+# Top Level Design Document
 
-Author: [Your Name]
+Author: Keith Aumiller
 
 ## Introduction
 
 ### Rationale
 
-What are you trying to accomplish? What’s wrong with things the way they are now?
+Good executive management is done via dashboards that are built to monitor and provide insight into the key metrics an organization needs to survive.  A lot of work goes into those metrics, how they are measured and  monitoried.  They use that information to make strategic decisions on how the pool of resources they have available are allocated.  It is the top of the food chain white collar job.
+
+Artificial intelligence has a great deal of benefits for all organizations.  Automation brings speed, improved quality, overall efficiency, reduced need for expertise etc.  
+
+AI has reached a point where anything can be automated, it is just a question of economic advantage.
+
+I think all organizations will eventually be leveraging AI at all levels.  Including the executive level.
+
+I am going to start laying the framework for automating any leadership role and will use management of the human race as a moonshot goal.  
+
+Any organization that wants a personalized AI counselor for its top leadership can follow this same playbook.
 
 ### Background
 
-Describe any historical context that would be needed to understand the document, including legacy considerations.
+Historically, automation has provided major advantages to those who adopt it, and put at a disadvantage those who have resisted it.  Better to embrace and accept than fight and avoid.  The historical examples are many, google them.
 
 ### Terminology
 
-If the document uses any special words or terms, list them here.
+There is a base assumption that anybody reading this is familar with Process Improvement, automation, statistics, computer science, and business terminology.  
 
 ### Non-Goals
 
-If there are related problems that you have decided not to address with this design, but which someone might conceivably expect you to solve, then list them here.
+Everything in the universe is in scope.  Moonshot.
 
 ## Proposed Design
 
-Start with a brief, high-level description of the solution. The following sections will go into more detail.
+The world is already steamrolling forward with automated science.  Every day discovery becomes easier, insight more attainable.  
 
 ### System Architecture
 
