@@ -33,6 +33,14 @@ Everything in the universe is in scope.  Moonshot.
 ## Proposed Design
 
 The world is already steamrolling forward with automated science.  Every day discovery becomes easier, insight more attainable.  
+A governance system is already in place with various levels of governmental law in place worldwide.
+The goal of all governming body is to improve peace and prosperity.
+
+This design is intended to create an objective framework that all decision making can be tied to, automated, and optimized in a transparent manner by the best possible methodlogy available.
+
+Academic science is already trying to accomplish this, but the framework is weak, has no authority, doesn't have a robust quality assurance methodology involved etc.
+
+By formalizing KPIs, and tying all science back to the objective of humanitarian goals, we can create a more democratic contributor version of our governance frameworks.
 
 ### System Architecture
 
