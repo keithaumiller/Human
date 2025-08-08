@@ -11,6 +11,27 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Verify deployment secrets
+      run: |
+        echo "Checking required secrets..."
+        if [ -z "${{ secrets.HOST }}" ]; then
+          echo "❌ ERROR: HOST secret is not configured"
+          exit 1
+        fi
+        if [ -z "${{ secrets.USERNAME }}" ]; then
+          echo "❌ ERROR: USERNAME secret is not configured"  
+          exit 1
+        fi
+        if [ -z "${{ secrets.PRIVATE_KEY }}" ]; then
+          echo "❌ ERROR: PRIVATE_KEY secret is not configured"
+          exit 1
+        fi
+        if [ -z "${{ secrets.HUBGIT_PAT }}" ]; then
+          echo "❌ ERROR: HUBGIT_PAT secret is not configured"
+          exit 1
+        fi
+        echo "✅ All required secrets are configured"
+    
     - name: Deploy Human Success module to production
       uses: appleboy/ssh-action@v1.0.0
       env:
