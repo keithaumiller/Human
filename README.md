@@ -1,6 +1,6 @@
 # Human Wiki Template
 
-Top Level [Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, historical, and forcast for the human race Success.
+Top Level [Human Success Dashboard](https://colab.research.google.com/drive/1q1huNZ9eN4L39OijFH472mIJ1Rf5K_5C#scrollTo=qcxOdaUy72e0) which has the current, best , historical, and forcast for the human race Success.
 
 Leadership is an optimization problem, this method is intended to achieve the most equitable and beneficial outcomes for humanity.
 
