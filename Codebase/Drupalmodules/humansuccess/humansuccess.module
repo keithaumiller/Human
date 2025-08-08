@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ * Contains humansuccess.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function humansuccess_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.humansuccess':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The Human Success module provides tools for tracking and displaying human success metrics and achievements.') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Dashboard') . '</dt>';
+      $output .= '<dd>' . t('View an overview of success metrics and recent activities at /human-success.') . '</dd>';
+      $output .= '<dt>' . t('Metrics') . '</dt>';
+      $output .= '<dd>' . t('View detailed metrics and analytics at /human-success/metrics.') . '</dd>';
+      $output .= '<dt>' . t('Administration') . '</dt>';
+      $output .= '<dd>' . t('Administrators can manage the system at /admin/human-success.') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function humansuccess_theme() {
+  return [
+    'humansuccess_dashboard' => [
+      'variables' => [
+        'data' => NULL,
+      ],
+      'template' => 'humansuccess-dashboard',
+    ],
+    'humansuccess_metrics' => [
+      'variables' => [
+        'metrics' => NULL,
+      ],
+      'template' => 'humansuccess-metrics',
+    ],
+    'humansuccess_admin' => [
+      'variables' => [
+        'admin_data' => NULL,
+      ],
+      'template' => 'humansuccess-admin',
+    ],
+  ];
+}

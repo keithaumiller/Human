@@ -1,0 +1,23 @@
+humansuccess.dashboard:
+  path: '/human-success'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\HumansuccessController::dashboard'
+    _title: 'Human Success Dashboard'
+  requirements:
+    _permission: 'access content'
+
+humansuccess.metrics:
+  path: '/human-success/metrics'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\HumansuccessController::metrics'
+    _title: 'Success Metrics'
+  requirements:
+    _permission: 'access content'
+
+humansuccess.admin:
+  path: '/admin/human-success'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\HumansuccessController::adminDashboard'
+    _title: 'Human Success Administration'
+  requirements:
+    _permission: 'administer human success'

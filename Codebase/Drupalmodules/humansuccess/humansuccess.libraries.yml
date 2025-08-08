@@ -1,0 +1,31 @@
+dashboard:
+  css:
+    theme:
+      css/dashboard.css: {}
+  js:
+    js/dashboard.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+metrics:
+  css:
+    theme:
+      css/metrics.css: {}
+  js:
+    js/metrics.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/chart
+
+admin:
+  css:
+    theme:
+      css/admin.css: {}
+  js:
+    js/admin.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupal.dialog

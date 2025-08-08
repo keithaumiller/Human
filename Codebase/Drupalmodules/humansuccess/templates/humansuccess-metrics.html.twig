@@ -1,0 +1,79 @@
+{#
+/**
+ * @file
+ * Template for the Human Success metrics page.
+ *
+ * Available variables:
+ * - metrics: Array containing metrics data including:
+ *   - monthly_progress: Array of monthly progress data
+ *   - category_breakdown: Array of category statistics
+ *   - user_engagement: Array of engagement metrics
+ */
+#}
+<div class="humansuccess-metrics">
+  <div class="metrics-header">
+    <h1>{{ 'Success Metrics'|t }}</h1>
+    <p class="metrics-subtitle">{{ 'Detailed analytics and insights'|t }}</p>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-section">
+      <h2>{{ 'Monthly Progress'|t }}</h2>
+      <div class="progress-chart">
+        {% if metrics.monthly_progress %}
+          <div class="chart-container">
+            {% for month, value in metrics.monthly_progress %}
+              <div class="chart-bar">
+                <div class="bar" style="height: {{ value }}%"></div>
+                <div class="bar-label">{{ month|slice(0,3) }}</div>
+                <div class="bar-value">{{ value }}%</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="metric-section">
+      <h2>{{ 'Category Breakdown'|t }}</h2>
+      <div class="category-stats">
+        {% if metrics.category_breakdown %}
+          {% for category, count in metrics.category_breakdown %}
+            <div class="category-item">
+              <span class="category-name">{{ category }}</span>
+              <span class="category-count">{{ count }}</span>
+              <div class="category-bar">
+                <div class="progress" style="width: {{ (count / 50 * 100) }}%"></div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="metric-section">
+      <h2>{{ 'User Engagement'|t }}</h2>
+      <div class="engagement-stats">
+        {% if metrics.user_engagement %}
+          <div class="engagement-item">
+            <span class="engagement-label">{{ 'Daily Active Users'|t }}</span>
+            <span class="engagement-value">{{ metrics.user_engagement.daily_active }}</span>
+          </div>
+          <div class="engagement-item">
+            <span class="engagement-label">{{ 'Weekly Active Users'|t }}</span>
+            <span class="engagement-value">{{ metrics.user_engagement.weekly_active }}</span>
+          </div>
+          <div class="engagement-item">
+            <span class="engagement-label">{{ 'Monthly Active Users'|t }}</span>
+            <span class="engagement-value">{{ metrics.user_engagement.monthly_active }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="metrics-actions">
+    <a href="/human-success" class="btn btn-secondary">{{ 'Back to Dashboard'|t }}</a>
+    <a href="/human-success/export" class="btn btn-primary">{{ 'Export Data'|t }}</a>
+  </div>
+</div>

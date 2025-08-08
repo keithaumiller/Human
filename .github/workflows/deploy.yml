@@ -1,0 +1,95 @@
+name: Deploy to Server
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Deploy modules to server
+      uses: appleboy/ssh-action@v0.1.5
+      env:
+        HUBGIT_PAT: ${{ secrets.HUBGIT_PAT }}
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        envs: HUBGIT_PAT
+        script: |
+          set -e  # Exit on any error
+          
+          echo "=== Starting deployment ==="
+          
+          # Navigate to custom modules directory (now the git repository)
+          cd /var/www/html/drupal/modules/custom
+          
+          # Configure git safe directory
+          git config --global --add safe.directory /var/www/html/drupal/modules/custom
+
+          # Set ownership to ubuntu for git operations
+          sudo chown -R ubuntu:ubuntu .git
+          sudo chown -R ubuntu:ubuntu .
+          
+          # Debug: Show current state
+          echo "=== Current git state ==="
+          git status
+          git log --oneline -3
+          echo "Current remote URL:"
+          git remote -v
+          
+          # Ensure we're using HTTPS URL with token authentication
+          git remote set-url origin https://${HUBGIT_PAT}@github.com/keithaumiller/thetruthperspective.git
+          echo "Updated remote URL to HTTPS with authentication"
+          
+          # Pull the latest changes with error checking
+          echo "=== Fetching latest changes ==="
+          if ! git fetch origin main; then
+            echo "ERROR: Failed to fetch from GitHub"
+            exit 1
+          fi
+
+          echo "=== After fetch ==="
+          git log --oneline -3
+
+          echo "=== Resetting to origin/main ==="
+          git reset --hard origin/main
+
+          echo "=== After reset ==="
+          git log --oneline -3
+          echo "Files in repository:"
+          ls -la
+
+          # Set proper permissions for all custom modules
+          sudo chown -R www-data:www-data .
+          sudo find . -type f -exec chmod 644 {} \;
+          sudo find . -type d -exec chmod 755 {} \;
+
+          echo "=== Custom modules deployed successfully ==="
+
+    - name: Clear Drupal cache
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          set -e
+
+          echo "=== Clearing Drupal cache ==="
+
+          # Fix file permissions for Drupal files directory
+          sudo chown -R www-data:www-data /var/www/html/drupal/sites/default/files
+          sudo find /var/www/html/drupal/sites/default/files -type f -exec chmod 664 {} \;
+          sudo find /var/www/html/drupal/sites/default/files -type d -exec chmod 775 {} \;
+
+          # Clear Drupal cache as www-data user
+          cd /var/www/html/drupal
+          if ! sudo -u www-data drush cr; then
+            echo "ERROR: Failed to clear Drupal cache"
+            exit 1
+          fi
+
+          echo "=== Cache cleared successfully ==="

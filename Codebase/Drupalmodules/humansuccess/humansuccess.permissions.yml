@@ -1,0 +1,8 @@
+administer human success:
+  title: 'Administer Human Success'
+  description: 'Perform administrative tasks for the Human Success module.'
+  restrict access: TRUE
+
+view human success data:
+  title: 'View Human Success Data'
+  description: 'View human success dashboards and metrics.'
