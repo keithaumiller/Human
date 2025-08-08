@@ -421,6 +421,58 @@ class PopulationAnalyticsController extends ControllerBase implements ContainerI
   }
 
   /**
+   * Displays demographic transition analysis dashboard.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request.
+   *
+   * @return array
+   *   The render array for demographic transitions.
+   */
+  public function demographicTransitions(Request $request) {
+    $region_id = $request->query->get('region_id', 'global');
+    $timeframe = $request->query->get('timeframe', '50years');
+    $transition_type = $request->query->get('transition_type', 'all');
+
+    // Get demographic transition data
+    $transition_data = $this->populationService->getDemographicTransitions($region_id, $timeframe, $transition_type);
+    
+    // Get quality of life correlation data
+    $qol_correlation = $this->qolService->getDemographicQoLCorrelation($region_id, $timeframe);
+
+    $build = [
+      '#theme' => 'humansuccess_demographic_transitions',
+      '#transition_data' => $transition_data,
+      '#qol_correlation' => $qol_correlation,
+      '#region_id' => $region_id,
+      '#timeframe' => $timeframe,
+      '#transition_type' => $transition_type,
+      '#available_regions' => $this->getAvailableRegions(),
+      '#attached' => [
+        'library' => [
+          'humansuccess/demographic_interface',
+          'humansuccess/time_series_charts',
+          'humansuccess/d3',
+        ],
+        'drupalSettings' => [
+          'humanSuccess' => [
+            'demographicTransitions' => [
+              'apiEndpoint' => '/human-success/api/demographic-data',
+              'regionId' => $region_id,
+              'timeframe' => $timeframe,
+              'transitionType' => $transition_type,
+              'transitionData' => $transition_data,
+              'qolCorrelation' => $qol_correlation,
+            ],
+          ],
+        ],
+      ],
+    ];
+
+    return $build;
+  }
+
+  /**
    * AJAX endpoint for scenario modeling data.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -470,6 +522,38 @@ class PopulationAnalyticsController extends ControllerBase implements ContainerI
       'life_expectancy' => 'Life Expectancy',
       'fertility_rate' => 'Fertility Rate',
       'infant_mortality' => 'Infant Mortality Rate',
+    ];
+  }
+
+  /**
+   * Get available regions for analysis.
+   *
+   * @return array
+   *   Array of available regions.
+   */
+  protected function getAvailableRegions(): array {
+    return [
+      'global' => 'Global',
+      'africa' => 'Africa',
+      'asia' => 'Asia',
+      'europe' => 'Europe',
+      'north_america' => 'North America',
+      'south_america' => 'South America',
+      'oceania' => 'Oceania',
+      'western_africa' => 'Western Africa',
+      'eastern_africa' => 'Eastern Africa',
+      'northern_africa' => 'Northern Africa',
+      'middle_africa' => 'Middle Africa',
+      'southern_africa' => 'Southern Africa',
+      'western_asia' => 'Western Asia',
+      'central_asia' => 'Central Asia',
+      'eastern_asia' => 'Eastern Asia',
+      'south_eastern_asia' => 'South-Eastern Asia',
+      'southern_asia' => 'Southern Asia',
+      'eastern_europe' => 'Eastern Europe',
+      'northern_europe' => 'Northern Europe',
+      'southern_europe' => 'Southern Europe',
+      'western_europe' => 'Western Europe',
     ];
   }
 

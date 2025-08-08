@@ -297,6 +297,47 @@ class PopulationDataService {
   }
 
   /**
+   * Get demographic transition analysis for a region.
+   *
+   * @param string $region_id
+   *   Region identifier (global, country code, etc.).
+   * @param string $timeframe
+   *   Time period for analysis (10years, 25years, 50years, historical).
+   * @param string $transition_type
+   *   Type of transition to analyze (all, fertility, mortality, migration).
+   * @param bool $use_cache
+   *   Whether to use cached data.
+   *
+   * @return array
+   *   Demographic transition analysis data.
+   */
+  public function getDemographicTransitions(string $region_id = 'global', string $timeframe = '50years', string $transition_type = 'all', bool $use_cache = TRUE): array {
+    // Try cache first
+    if ($use_cache) {
+      $cached = $this->dataCache->getDemographicTransitions($region_id, $timeframe, $transition_type);
+      if ($cached) {
+        return $cached;
+      }
+    }
+    
+    // Get demographic transition data from backend
+    $data = $this->backendApi->getDemographicTransitions($region_id, $timeframe, $transition_type);
+    
+    if ($data) {
+      $processed = $this->processDemographicTransitionsData($data, $region_id, $timeframe, $transition_type);
+      
+      // Cache the processed data
+      if ($use_cache) {
+        $this->dataCache->setDemographicTransitions($processed, $region_id, $timeframe, $transition_type);
+      }
+      
+      return $processed;
+    }
+    
+    return $this->getEmptyDemographicTransitionsStructure($region_id, $timeframe);
+  }
+
+  /**
    * Get age structure analysis for population.
    *
    * @param string $region_type
@@ -638,6 +679,28 @@ class PopulationDataService {
     return ['density_metrics' => [], 'spatial_distribution' => [], 'density_trends' => []];
   }
 
+  protected function getEmptyDemographicTransitionsStructure(string $region_id, string $timeframe): array {
+    return [
+      'region_id' => $region_id,
+      'timeframe' => $timeframe,
+      'transition_stages' => [],
+      'demographic_indicators' => [
+        'birth_rate' => [],
+        'death_rate' => [],
+        'fertility_rate' => [],
+        'life_expectancy' => [],
+        'infant_mortality' => [],
+      ],
+      'transition_analysis' => [
+        'current_stage' => 'unknown',
+        'transition_progress' => 0,
+        'key_factors' => [],
+      ],
+      'projections' => [],
+      'historical_context' => [],
+    ];
+  }
+
   /**
    * Placeholder methods for future implementation.
    */
@@ -663,6 +726,45 @@ class PopulationDataService {
 
   protected function projectAgeStructure(array $data): array {
     return ['projections_calculated' => TRUE];
+  }
+
+  protected function processDemographicTransitionsData(array $data, string $region_id, string $timeframe, string $transition_type): array {
+    $processed = [
+      'region_id' => $region_id,
+      'timeframe' => $timeframe,
+      'transition_type' => $transition_type,
+      'raw_data' => $data,
+      'processed_at' => date('c'),
+    ];
+    
+    // Add demographic transition processing logic here
+    if (isset($data['demographic_indicators'])) {
+      $processed['transition_stages'] = $this->analyzeDemographicTransitionStages($data['demographic_indicators']);
+      $processed['transition_analysis'] = $this->calculateTransitionProgress($data['demographic_indicators']);
+    }
+    
+    return $processed;
+  }
+
+  protected function analyzeDemographicTransitionStages(array $indicators): array {
+    // Placeholder for demographic transition stage analysis
+    return [
+      'stage_1' => ['period' => 'pre-1800', 'characteristics' => 'High birth and death rates'],
+      'stage_2' => ['period' => '1800-1900', 'characteristics' => 'Declining death rate, high birth rate'],
+      'stage_3' => ['period' => '1900-1970', 'characteristics' => 'Declining birth rate, low death rate'],
+      'stage_4' => ['period' => '1970+', 'characteristics' => 'Low birth and death rates'],
+      'stage_5' => ['period' => 'Future', 'characteristics' => 'Very low birth rate, aging population'],
+    ];
+  }
+
+  protected function calculateTransitionProgress(array $indicators): array {
+    // Placeholder for transition progress calculation
+    return [
+      'current_stage' => 'stage_4',
+      'transition_progress' => 0.75,
+      'key_factors' => ['healthcare_improvement', 'education_expansion', 'economic_development'],
+      'projected_completion' => '2050',
+    ];
   }
 
 }

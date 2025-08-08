@@ -606,4 +606,134 @@ class QualityOfLifeService {
     return [];
   }
 
+  /**
+   * Get correlation between demographic transitions and quality of life metrics.
+   *
+   * @param string $region_id
+   *   Region identifier.
+   * @param string $timeframe
+   *   Time period for correlation analysis.
+   * @param array $qol_metrics
+   *   Specific QoL metrics to correlate.
+   *
+   * @return array
+   *   Demographic-QoL correlation analysis.
+   */
+  public function getDemographicQoLCorrelation(string $region_id, string $timeframe = '50years', array $qol_metrics = []): array {
+    // Use standard metrics if none specified
+    if (empty($qol_metrics)) {
+      $qol_metrics = array_keys($this->standardMetrics);
+    }
+    
+    $correlation_analysis = [
+      'region_id' => $region_id,
+      'timeframe' => $timeframe,
+      'qol_metrics' => $qol_metrics,
+      'correlations' => [],
+      'strongest_correlations' => [],
+      'demographic_drivers' => [],
+      'policy_implications' => [],
+    ];
+    
+    // Get QoL trend data for the region
+    $qol_trends = $this->getWellbeingTrends('global', $region_id, $timeframe, $qol_metrics);
+    
+    // Calculate correlations for key demographic indicators
+    $demographic_indicators = [
+      'birth_rate' => 'Birth Rate',
+      'death_rate' => 'Death Rate',
+      'fertility_rate' => 'Total Fertility Rate',
+      'life_expectancy' => 'Life Expectancy',
+      'age_median' => 'Median Age',
+      'urbanization_rate' => 'Urbanization Rate',
+      'dependency_ratio' => 'Dependency Ratio',
+    ];
+    
+    foreach ($demographic_indicators as $demo_key => $demo_label) {
+      foreach ($qol_metrics as $qol_metric) {
+        $correlation = $this->calculateDemographicQoLCorrelation($demo_key, $qol_metric, $region_id, $timeframe);
+        $correlation_analysis['correlations'][$demo_key][$qol_metric] = $correlation;
+      }
+    }
+    
+    // Identify strongest correlations
+    $correlation_analysis['strongest_correlations'] = $this->identifyStrongestCorrelations($correlation_analysis['correlations']);
+    
+    // Identify key demographic drivers of QoL change
+    $correlation_analysis['demographic_drivers'] = $this->identifyDemographicDrivers($correlation_analysis['correlations']);
+    
+    // Generate policy implications
+    $correlation_analysis['policy_implications'] = $this->generateDemographicPolicyImplications($correlation_analysis);
+    
+    return $correlation_analysis;
+  }
+
+  /**
+   * Calculate correlation between a demographic indicator and QoL metric.
+   *
+   * @param string $demographic_indicator
+   *   Demographic indicator key.
+   * @param string $qol_metric
+   *   Quality of life metric.
+   * @param string $region_id
+   *   Region identifier.
+   * @param string $timeframe
+   *   Time period for analysis.
+   *
+   * @return array
+   *   Correlation analysis result.
+   */
+  protected function calculateDemographicQoLCorrelation(string $demographic_indicator, string $qol_metric, string $region_id, string $timeframe): array {
+    // Placeholder implementation - would calculate actual Pearson correlation
+    return [
+      'correlation_coefficient' => 0.0,
+      'statistical_significance' => 'not_significant',
+      'relationship_type' => 'none',
+      'confidence_interval' => [0.0, 0.0],
+      'data_quality' => 'sufficient',
+    ];
+  }
+
+  /**
+   * Identify strongest correlations from correlation matrix.
+   *
+   * @param array $correlations
+   *   Full correlation matrix.
+   *
+   * @return array
+   *   Strongest correlations ranked by strength.
+   */
+  protected function identifyStrongestCorrelations(array $correlations): array {
+    // Placeholder - would analyze correlation matrix and rank by strength
+    return [];
+  }
+
+  /**
+   * Identify key demographic drivers of QoL changes.
+   *
+   * @param array $correlations
+   *   Correlation analysis results.
+   *
+   * @return array
+   *   Key demographic drivers.
+   */
+  protected function identifyDemographicDrivers(array $correlations): array {
+    // Placeholder - would identify most influential demographic factors
+    return [];
+  }
+
+  /**
+   * Generate policy implications from demographic-QoL correlations.
+   *
+   * @param array $correlation_analysis
+   *   Full correlation analysis.
+   *
+   * @return array
+   *   Policy implications and recommendations.
+   */
+  protected function generateDemographicPolicyImplications(array $correlation_analysis): array {
+    // Placeholder - would generate actionable policy recommendations
+    return [];
+  }
+
 }

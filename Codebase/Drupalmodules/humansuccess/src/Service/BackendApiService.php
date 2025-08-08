@@ -352,6 +352,47 @@ class BackendApiService {
   }
 
   /**
+   * Get demographic transition analysis data.
+   *
+   * @param string $region_id
+   *   Region identifier (global, country code, etc.).
+   * @param string $timeframe
+   *   Time period for analysis (10years, 25years, 50years, historical).
+   * @param string $transition_type
+   *   Type of transition to analyze (all, fertility, mortality, migration).
+   *
+   * @return array|null
+   *   Demographic transition analysis data or NULL on failure.
+   */
+  public function getDemographicTransitions(string $region_id = 'global', string $timeframe = '50years', string $transition_type = 'all'): ?array {
+    try {
+      $params = [
+        'region_id' => $region_id,
+        'timeframe' => $timeframe,
+        'transition_type' => $transition_type,
+      ];
+
+      $response = $this->httpClient->request('GET', $this->apiBaseUrl . '/demographics/transitions', [
+        'query' => $params,
+      ]);
+
+      $data = json_decode($response->getBody()->getContents(), TRUE);
+      
+      $this->logger->info('Demographic transitions data retrieved for region: @region_id', [
+        '@region_id' => $region_id,
+      ]);
+      
+      return $data;
+    }
+    catch (RequestException $e) {
+      $this->logger->error('Failed to retrieve demographic transitions data: @message', [
+        '@message' => $e->getMessage(),
+      ]);
+      return NULL;
+    }
+  }
+
+  /**
    * Test backend API connectivity.
    *
    * @return bool

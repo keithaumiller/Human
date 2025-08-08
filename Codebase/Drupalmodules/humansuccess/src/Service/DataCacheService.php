@@ -347,6 +347,64 @@ class DataCacheService {
   }
 
   /**
+   * Get cached demographic transitions data.
+   *
+   * @param string $region_id
+   *   Region identifier.
+   * @param string $timeframe
+   *   Time period for analysis.
+   * @param string $transition_type
+   *   Type of transition analysis.
+   *
+   * @return array|null
+   *   Cached demographic transitions data or NULL if not found.
+   */
+  public function getDemographicTransitions(string $region_id, string $timeframe, string $transition_type): ?array {
+    $cache_key = $this->buildCacheKey('demographic_transitions', [
+      'region_id' => $region_id,
+      'timeframe' => $timeframe,
+      'transition_type' => $transition_type,
+    ]);
+    
+    $cached = $this->cache->get($cache_key);
+    if ($cached && $cached->valid) {
+      return $cached->data;
+    }
+    
+    return NULL;
+  }
+
+  /**
+   * Set cached demographic transitions data.
+   *
+   * @param array $data
+   *   Demographic transitions data to cache.
+   * @param string $region_id
+   *   Region identifier.
+   * @param string $timeframe
+   *   Time period for analysis.
+   * @param string $transition_type
+   *   Type of transition analysis.
+   * @param int $ttl
+   *   Cache TTL override.
+   */
+  public function setDemographicTransitions(array $data, string $region_id, string $timeframe, string $transition_type, int $ttl = NULL): void {
+    $cache_key = $this->buildCacheKey('demographic_transitions', [
+      'region_id' => $region_id,
+      'timeframe' => $timeframe,
+      'transition_type' => $transition_type,
+    ]);
+    
+    $expire = $ttl ? time() + $ttl : time() + $this->defaultTtl;
+    
+    $this->cache->set($cache_key, $data, $expire, [
+      'humansuccess:demographics',
+      'humansuccess:transitions',
+      'humansuccess:analytics',
+    ]);
+  }
+
+  /**
    * Invalidate cached data by tags.
    *
    * @param array $tags
