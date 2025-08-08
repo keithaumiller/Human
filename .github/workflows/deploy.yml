@@ -1,16 +1,18 @@
-name: Deploy to Server
+name: Deploy Human Success Module
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
+  workflow_dispatch:  # Allow manual triggering
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
-    - name: Deploy modules to server
-      uses: appleboy/ssh-action@v0.1.5
+    - name: Deploy Human Success module to production
+      uses: appleboy/ssh-action@v1.0.0
       env:
         HUBGIT_PAT: ${{ secrets.HUBGIT_PAT }}
       with:
@@ -21,9 +23,10 @@ jobs:
         script: |
           set -e  # Exit on any error
           
-          echo "=== Starting deployment ==="
+          echo "=== Starting Human Success Module Deployment ==="
+          echo "Deployment started at: $(date)"
           
-          # Navigate to custom modules directory (now the git repository)
+          # Navigate to custom modules directory
           cd /var/www/html/drupal/modules/custom
           
           # Configure git safe directory
@@ -40,13 +43,13 @@ jobs:
           echo "Current remote URL:"
           git remote -v
           
-          # Ensure we're using HTTPS URL with token authentication
-          git remote set-url origin https://${HUBGIT_PAT}@github.com/keithaumiller/thetruthperspective.git
+          # Ensure we're using correct repository URL with token authentication
+          git remote set-url origin https://${HUBGIT_PAT}@github.com/keithaumiller/Human.git
           echo "Updated remote URL to HTTPS with authentication"
           
           # Pull the latest changes with error checking
-          echo "=== Fetching latest changes ==="
-          if ! git fetch origin main; then
+          echo "=== Fetching latest changes from master branch ==="
+          if ! git fetch origin master; then
             echo "ERROR: Failed to fetch from GitHub"
             exit 1
           fi
@@ -54,23 +57,84 @@ jobs:
           echo "=== After fetch ==="
           git log --oneline -3
 
-          echo "=== Resetting to origin/main ==="
-          git reset --hard origin/main
+          echo "=== Resetting to origin/master ==="
+          git reset --hard origin/master
 
           echo "=== After reset ==="
           git log --oneline -3
           echo "Files in repository:"
           ls -la
+          
+          # Verify humansuccess module files exist
+          echo "=== Verifying Human Success module files ==="
+          if [ -d "Codebase/Drupalmodules/humansuccess" ]; then
+            echo "✓ Human Success module directory found"
+            ls -la Codebase/Drupalmodules/humansuccess/
+          else
+            echo "ERROR: Human Success module directory not found!"
+            exit 1
+          fi
+          
+          # Copy humansuccess module to proper location
+          echo "=== Deploying Human Success module ==="
+          sudo mkdir -p /var/www/html/drupal/modules/custom/humansuccess
+          sudo cp -r Codebase/Drupalmodules/humansuccess/* /var/www/html/drupal/modules/custom/humansuccess/
+          
+          echo "✓ Module files copied successfully"
+
+          # Set proper permissions for the humansuccess module
+          sudo chown -R www-data:www-data /var/www/html/drupal/modules/custom/humansuccess
+          sudo find /var/www/html/drupal/modules/custom/humansuccess -type f -exec chmod 644 {} \;
+          sudo find /var/www/html/drupal/modules/custom/humansuccess -type d -exec chmod 755 {} \;
+          
+          echo "✓ Permissions set correctly"
 
           # Set proper permissions for all custom modules
           sudo chown -R www-data:www-data .
           sudo find . -type f -exec chmod 644 {} \;
           sudo find . -type d -exec chmod 755 {} \;
 
-          echo "=== Custom modules deployed successfully ==="
+          echo "=== Human Success module deployed successfully ==="
 
-    - name: Clear Drupal cache
-      uses: appleboy/ssh-action@v0.1.5
+    - name: Enable and configure Human Success module
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.PRIVATE_KEY }}
+        script: |
+          set -e
+
+          echo "=== Enabling Human Success module ==="
+
+          cd /var/www/html/drupal
+
+          # Check if module is already enabled
+          if sudo -u www-data drush pm:list --type=module --status=enabled | grep -q "humansuccess"; then
+            echo "✓ Human Success module is already enabled"
+          else
+            echo "Enabling Human Success module..."
+            if sudo -u www-data drush en humansuccess -y; then
+              echo "✓ Human Success module enabled successfully"
+            else
+              echo "ERROR: Failed to enable Human Success module"
+              exit 1
+            fi
+          fi
+
+          # Import configuration if needed
+          echo "=== Checking for configuration updates ==="
+          if sudo -u www-data drush config:status; then
+            echo "✓ Configuration is in sync"
+          else
+            echo "Configuration updates available, importing..."
+            sudo -u www-data drush config:import -y || echo "No configuration to import"
+          fi
+
+          echo "=== Module enablement completed ==="
+
+    - name: Clear Drupal cache and verify deployment
+      uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
@@ -80,16 +144,66 @@ jobs:
 
           echo "=== Clearing Drupal cache ==="
 
+          cd /var/www/html/drupal
+
           # Fix file permissions for Drupal files directory
           sudo chown -R www-data:www-data /var/www/html/drupal/sites/default/files
           sudo find /var/www/html/drupal/sites/default/files -type f -exec chmod 664 {} \;
           sudo find /var/www/html/drupal/sites/default/files -type d -exec chmod 775 {} \;
 
           # Clear Drupal cache as www-data user
-          cd /var/www/html/drupal
           if ! sudo -u www-data drush cr; then
             echo "ERROR: Failed to clear Drupal cache"
             exit 1
           fi
 
-          echo "=== Cache cleared successfully ==="
+          echo "✓ Cache cleared successfully"
+
+          # Verify module deployment
+          echo "=== Verifying Human Success module deployment ==="
+          
+          # Check if module files exist
+          if [ -f "/var/www/html/drupal/modules/custom/humansuccess/humansuccess.info.yml" ]; then
+            echo "✓ Module files are present"
+          else
+            echo "ERROR: Module files not found!"
+            exit 1
+          fi
+          
+          # Check if module is enabled
+          if sudo -u www-data drush pm:list --type=module --status=enabled | grep -q "humansuccess"; then
+            echo "✓ Human Success module is enabled"
+          else
+            echo "ERROR: Human Success module is not enabled!"
+            exit 1
+          fi
+          
+          # Check if routes are accessible
+          echo "=== Testing module routes ==="
+          if sudo -u www-data drush route:list | grep -q "humansuccess"; then
+            echo "✓ Module routes are registered"
+          else
+            echo "WARNING: Module routes not found, but this may be normal"
+          fi
+          
+          # Test basic connectivity (optional - requires curl)
+          echo "=== Testing web accessibility ==="
+          if command -v curl >/dev/null 2>&1; then
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost/human-success | grep -q "200\|301\|302"; then
+              echo "✓ Human Success dashboard is accessible"
+            else
+              echo "WARNING: Dashboard may not be accessible yet (this could be normal if authentication is required)"
+            fi
+          else
+            echo "ℹ Curl not available, skipping web accessibility test"
+          fi
+
+          echo "=== Deployment verification completed ==="
+          echo "Deployment finished at: $(date)"
+          echo ""
+          echo "🎉 Human Success module deployment successful!"
+          echo ""
+          echo "Access URLs:"
+          echo "- Dashboard: https://thetruthperspective.org/human-success"
+          echo "- Metrics: https://thetruthperspective.org/human-success/metrics"
+          echo "- Admin: https://thetruthperspective.org/admin/human-success"
