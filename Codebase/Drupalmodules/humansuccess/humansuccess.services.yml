@@ -5,15 +5,15 @@ services:
   # DEPENDENCIES: Guzzle HTTP client, configuration management
   humansuccess.backend_api:
     class: Drupal\humansuccess\Service\BackendApiService
-    arguments: ['@http_client', '@config.factory', '@logger.factory']
+    arguments: ['@http_client_factory', '@config.factory', '@logger.factory']
 
   # Data Cache Service  
   # PURPOSE: Manage caching of backend data for performance
   # INTERFACES: Drupal cache API, backend data structures
-  # DEPENDENCIES: Cache backend, database connection
+  # DEPENDENCIES: Cache backend, configuration factory, logger
   humansuccess.data_cache:
     class: Drupal\humansuccess\Service\DataCacheService
-    arguments: ['@cache.default', '@database', '@datetime.time']
+    arguments: ['@cache.default', '@config.factory', '@logger.factory']
 
   # H3 Geospatial Service
   # PURPOSE: Process H3 hexagonal data for frontend display
@@ -29,7 +29,7 @@ services:
   # DEPENDENCIES: Backend API, data validation, caching
   humansuccess.population_data:
     class: Drupal\humansuccess\Service\PopulationDataService
-    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache', '@logger.factory']
+    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache', '@config.factory', '@logger.factory']
 
   # Quality of Life Service
   # PURPOSE: Process QoL metrics and optimization results
@@ -37,4 +37,4 @@ services:
   # DEPENDENCIES: Backend API, statistical processing, caching
   humansuccess.quality_of_life:
     class: Drupal\humansuccess\Service\QualityOfLifeService
-    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache']
+    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache', '@config.factory', '@logger.factory']
