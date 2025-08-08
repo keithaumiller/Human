@@ -21,3 +21,71 @@ humansuccess.admin:
     _title: 'Human Success Administration'
   requirements:
     _permission: 'administer human success'
+
+# Geospatial H3 Mapping Routes
+humansuccess.h3_map:
+  path: '/human-success/geospatial/h3-map'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\GeospatialController::h3PopulationMap'
+    _title: 'Global Population H3 Map'
+  requirements:
+    _permission: 'access content'
+
+humansuccess.global_monitoring:
+  path: '/human-success/monitoring'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\GeospatialController::globalMonitoring'
+    _title: 'Global Population Monitoring'
+  requirements:
+    _permission: 'access content'
+
+# Population Analytics Routes
+humansuccess.population_trends:
+  path: '/human-success/population/trends'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\PopulationAnalyticsController::globalTrends'
+    _title: 'Global Population Trends'
+  requirements:
+    _permission: 'access content'
+
+humansuccess.population_forecasting:
+  path: '/human-success/population/forecasting'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\PopulationAnalyticsController::multivariateForecasting'
+    _title: 'Population Forecasting Models'
+  requirements:
+    _permission: 'access content'
+
+humansuccess.regional_analysis:
+  path: '/human-success/population/regional/{region_id}'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\PopulationAnalyticsController::regionalAnalysis'
+    _title: 'Regional Population Analysis'
+    region_id: null
+  requirements:
+    _permission: 'access content'
+
+humansuccess.scenario_modeling:
+  path: '/human-success/population/scenarios'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\PopulationAnalyticsController::scenarioModeling'
+    _title: 'Population Scenario Modeling'
+  requirements:
+    _permission: 'access content'
+
+humansuccess.demographic_transitions:
+  path: '/human-success/population/demographics'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\PopulationAnalyticsController::demographicTransitions'
+    _title: 'Demographic Transition Analysis'
+  requirements:
+    _permission: 'access content'
+
+# Quality of Life Routes (placeholder for future controller)
+humansuccess.qol_optimization:
+  path: '/human-success/quality-of-life/optimization'
+  defaults:
+    _controller: '\Drupal\humansuccess\Controller\GeospatialController::qualityOfLifeOptimization'
+    _title: 'Quality of Life Optimization'
+  requirements:
+    _permission: 'access content'

@@ -1,0 +1,40 @@
+services:
+  # Backend API Service
+  # PURPOSE: HTTP client for Python backend communication
+  # INTERFACES: FastAPI REST endpoints
+  # DEPENDENCIES: Guzzle HTTP client, configuration management
+  humansuccess.backend_api:
+    class: Drupal\humansuccess\Service\BackendApiService
+    arguments: ['@http_client', '@config.factory', '@logger.factory']
+
+  # Data Cache Service  
+  # PURPOSE: Manage caching of backend data for performance
+  # INTERFACES: Drupal cache API, backend data structures
+  # DEPENDENCIES: Cache backend, database connection
+  humansuccess.data_cache:
+    class: Drupal\humansuccess\Service\DataCacheService
+    arguments: ['@cache.default', '@database', '@datetime.time']
+
+  # H3 Geospatial Service
+  # PURPOSE: Process H3 hexagonal data for frontend display
+  # INTERFACES: H3 data structures, JavaScript visualization prep
+  # DEPENDENCIES: Backend API service, geometry processing
+  humansuccess.h3_geospatial:
+    class: Drupal\humansuccess\Service\H3GeospatialService
+    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache']
+
+  # Population Data Service
+  # PURPOSE: Manage population data processing and formatting
+  # INTERFACES: Population time series, demographic analysis
+  # DEPENDENCIES: Backend API, data validation, caching
+  humansuccess.population_data:
+    class: Drupal\humansuccess\Service\PopulationDataService
+    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache', '@logger.factory']
+
+  # Quality of Life Service
+  # PURPOSE: Process QoL metrics and optimization results
+  # INTERFACES: QoL composite indices, optimization recommendations
+  # DEPENDENCIES: Backend API, statistical processing, caching
+  humansuccess.quality_of_life:
+    class: Drupal\humansuccess\Service\QualityOfLifeService
+    arguments: ['@humansuccess.backend_api', '@humansuccess.data_cache']
