@@ -47,46 +47,21 @@ jobs:
           echo "=== Starting Human Success Module Deployment ==="
           echo "Deployment started at: $(date)"
           
-          # Navigate to custom modules directory
-          cd /var/www/html/drupal/modules/custom
+          # Create a temporary directory for the repository
+          TEMP_DIR="/tmp/human_success_deploy_$(date +%s)"
+          mkdir -p $TEMP_DIR
+          cd $TEMP_DIR
           
-          # Configure git safe directory
-          git config --global --add safe.directory /var/www/html/drupal/modules/custom
-
-          # Set ownership to ubuntu for git operations
-          sudo chown -R ubuntu:ubuntu .git
-          sudo chown -R ubuntu:ubuntu .
-          
-          # Debug: Show current state
-          echo "=== Current git state ==="
-          git status
-          git log --oneline -3
-          echo "Current remote URL:"
-          git remote -v
-          
-          # Ensure we're using correct repository URL with token authentication
-          git remote set-url origin https://${HUBGIT_PAT}@github.com/keithaumiller/Human.git
-          echo "Updated remote URL to HTTPS with authentication"
-          
-          # Pull the latest changes with error checking
-          echo "=== Fetching latest changes from master branch ==="
-          if ! git fetch origin master; then
-            echo "ERROR: Failed to fetch from GitHub"
+          echo "=== Cloning repository to temporary location ==="
+          if ! git clone https://${HUBGIT_PAT}@github.com/keithaumiller/Human.git .; then
+            echo "ERROR: Failed to clone repository"
             exit 1
           fi
-
-          echo "=== After fetch ==="
-          git log --oneline -3
-
-          echo "=== Resetting to origin/master ==="
-          git reset --hard origin/master
-
-          echo "=== After reset ==="
-          git log --oneline -3
-          echo "Files in repository:"
+          
+          echo "=== Repository cloned successfully ==="
           ls -la
           
-          # Verify humansuccess module files exist
+          # Verify humansuccess module files exist in temp directory
           echo "=== Verifying Human Success module files ==="
           if [ -d "Codebase/Drupalmodules/humansuccess" ]; then
             echo "✓ Human Success module directory found"
@@ -96,12 +71,15 @@ jobs:
             exit 1
           fi
           
-          # Copy humansuccess module to proper location
-          echo "=== Deploying Human Success module ==="
+          # Copy ONLY the humansuccess module to the Drupal modules directory
+          echo "=== Deploying Human Success module (preserving other modules) ==="
           sudo mkdir -p /var/www/html/drupal/modules/custom/humansuccess
+          
+          # Remove old version if exists, then copy new version
+          sudo rm -rf /var/www/html/drupal/modules/custom/humansuccess/*
           sudo cp -r Codebase/Drupalmodules/humansuccess/* /var/www/html/drupal/modules/custom/humansuccess/
           
-          echo "✓ Module files copied successfully"
+          echo "✓ Module files copied successfully (other modules preserved)"
           
           # Verify module files were copied correctly
           echo "=== Verifying deployed module files ==="
@@ -114,20 +92,24 @@ jobs:
             echo "ERROR: Module info file missing!"
             exit 1
           fi
+          
+          # Verify other custom modules are still present
+          echo "=== Verifying other custom modules are preserved ==="
+          ls -la /var/www/html/drupal/modules/custom/
+          
+          # Clean up temporary directory
+          cd /
+          rm -rf $TEMP_DIR
+          echo "✓ Temporary files cleaned up"
 
-          # Set proper permissions for the humansuccess module
+          # Set proper permissions ONLY for the humansuccess module
           sudo chown -R www-data:www-data /var/www/html/drupal/modules/custom/humansuccess
           sudo find /var/www/html/drupal/modules/custom/humansuccess -type f -exec chmod 644 {} \;
           sudo find /var/www/html/drupal/modules/custom/humansuccess -type d -exec chmod 755 {} \;
           
-          echo "✓ Permissions set correctly"
+          echo "✓ Permissions set correctly for Human Success module only"
 
-          # Set proper permissions for all custom modules
-          sudo chown -R www-data:www-data .
-          sudo find . -type f -exec chmod 644 {} \;
-          sudo find . -type d -exec chmod 755 {} \;
-
-          echo "=== Human Success module deployed successfully ==="
+          echo "=== Human Success module deployed successfully (other modules preserved) ==="
 
     - name: Enable and configure Human Success module
       uses: appleboy/ssh-action@v1.0.0
