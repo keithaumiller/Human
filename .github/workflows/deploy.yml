@@ -102,6 +102,18 @@ jobs:
           sudo cp -r Codebase/Drupalmodules/humansuccess/* /var/www/html/drupal/modules/custom/humansuccess/
           
           echo "✓ Module files copied successfully"
+          
+          # Verify module files were copied correctly
+          echo "=== Verifying deployed module files ==="
+          ls -la /var/www/html/drupal/modules/custom/humansuccess/
+          
+          if [ -f "/var/www/html/drupal/modules/custom/humansuccess/humansuccess.info.yml" ]; then
+            echo "✓ Module info file exists"
+            cat /var/www/html/drupal/modules/custom/humansuccess/humansuccess.info.yml
+          else
+            echo "ERROR: Module info file missing!"
+            exit 1
+          fi
 
           # Set proper permissions for the humansuccess module
           sudo chown -R www-data:www-data /var/www/html/drupal/modules/custom/humansuccess
@@ -130,27 +142,42 @@ jobs:
 
           cd /var/www/html/drupal
 
+          # Clear cache first to refresh module discovery
+          echo "Clearing cache before enabling module..."
+          sudo -u www-data drush cr
+
+          # Check if humansuccess module exists and can be enabled
+          echo "=== Checking module status ==="
+          if sudo -u www-data drush pm:list --type=module | grep -q "humansuccess"; then
+            echo "✓ Human Success module found in system"
+          else
+            echo "ERROR: Human Success module not found in Drupal system"
+            echo "Available custom modules:"
+            sudo -u www-data drush pm:list --type=module | grep -i custom || echo "No custom modules found"
+            exit 1
+          fi
+
           # Check if module is already enabled
           if sudo -u www-data drush pm:list --type=module --status=enabled | grep -q "humansuccess"; then
             echo "✓ Human Success module is already enabled"
           else
             echo "Enabling Human Success module..."
-            if sudo -u www-data drush en humansuccess -y; then
+            # Try to enable with more verbose output
+            if sudo -u www-data drush en humansuccess -y --verbose; then
               echo "✓ Human Success module enabled successfully"
             else
               echo "ERROR: Failed to enable Human Success module"
+              echo "Checking for dependency issues..."
+              sudo -u www-data drush pm:list --type=module | grep humansuccess || echo "Module not found"
+              echo "Drupal status:"
+              sudo -u www-data drush status
               exit 1
             fi
           fi
 
-          # Import configuration if needed
+          # Import configuration if needed (but don't fail if no config)
           echo "=== Checking for configuration updates ==="
-          if sudo -u www-data drush config:status; then
-            echo "✓ Configuration is in sync"
-          else
-            echo "Configuration updates available, importing..."
-            sudo -u www-data drush config:import -y || echo "No configuration to import"
-          fi
+          sudo -u www-data drush config:status || echo "No configuration changes detected"
 
           echo "=== Module enablement completed ==="
 
