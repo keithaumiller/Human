@@ -1,0 +1,11 @@
+{# Display external image if the field is set #}
+{% if node.field_external_image_url.0.uri %}
+  <div class="article-image">
+    <img src="{{ node.field_external_image_url.0.uri }}" alt="{{ node.title.value }}" class="img-fluid" loading="lazy" />
+  </div>
+{% endif %}
+
+{# Display the article title #}
+<h3 class="article-title">{{ node.title.value }}</h3>
+
+{{ content }}

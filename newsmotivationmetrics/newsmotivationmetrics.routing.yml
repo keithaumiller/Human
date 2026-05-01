@@ -1,0 +1,105 @@
+# Public metrics route disabled - now using blocks on front page
+# newsmotivationmetrics.metrics_dashboard:
+#   path: '/metrics'
+#   defaults:
+#     _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::dashboard'
+#     _title: 'News Motivation Metrics'
+#   requirements:
+#     _access: 'TRUE'
+
+newsmotivationmetrics.tag_details:
+  path: '/metrics/tag/{tid}'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::tagDetails'
+    _title: 'Tag Analysis'
+  requirements:
+    _access: 'TRUE'
+    tid: \d+
+
+newsmotivationmetrics.bias_chart:
+  path: '/metrics/bias'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::biasChart'
+    _title: 'News Source Bias Trends'
+  requirements:
+    _access: 'TRUE'
+
+newsmotivationmetrics.credibility_chart:
+  path: '/metrics/credibility'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::credibilityChart'
+    _title: 'News Source Credibility Trends'
+  requirements:
+    _access: 'TRUE'
+
+newsmotivationmetrics.sentiment_chart:
+  path: '/metrics/sentiment'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::sentimentChart'
+    _title: 'News Source Sentiment Trends'
+  requirements:
+    _access: 'TRUE'
+
+newsmotivationmetrics.authoritarianism_chart:
+  path: '/metrics/authoritarianism'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::authoritarianismChart'
+    _title: 'News Source Authoritarianism Trends'
+  requirements:
+    _access: 'TRUE'
+
+newsmotivationmetrics.admin_dashboard:
+  path: '/admin/reports/news-motivation-metrics'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\MetricsController::adminDashboard'
+    _title: 'News Motivation Metrics (Admin)'
+  requirements:
+    _permission: 'access news motivation metrics'
+
+# Configuration form
+newsmotivationmetrics.settings:
+  path: '/admin/config/development/newsmotivationmetrics'
+  defaults:
+    _form: '\Drupal\newsmotivationmetrics\Form\NewsMotivationMetricsSettingsForm'
+    _title: 'News Motivation Metrics Settings'
+  requirements:
+    _permission: 'administer newsmotivationmetrics'
+
+# Chart debug page for development and troubleshooting
+newsmotivationmetrics.chart_debug:
+  path: '/admin/config/development/newsmotivationmetrics/chart-debug'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\ChartDebugController::debugPage'
+    _title: 'Chart.js Debug Console'
+  requirements:
+    _permission: 'administer newsmotivationmetrics'
+
+newsmotivationmetrics.chart_test:
+  path: '/admin/config/development/newsmotivationmetrics/chart-test'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\ChartTestController::testPage'
+    _title: 'Chart.js Hello World Test - Verified Paths'
+  requirements:
+    _permission: 'access administration pages'
+
+newsmotivationmetrics.chart_debug_refresh:
+  path: '/admin/config/development/newsmotivationmetrics/chart-debug/refresh'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\ChartDebugController::refreshData'
+  requirements:
+    _permission: 'access administration pages'
+
+newsmotivationmetrics.chart_debug_test:
+  path: '/admin/config/development/newsmotivationmetrics/chart-debug/test'
+  defaults:
+    _controller: '\Drupal\newsmotivationmetrics\Controller\ChartDebugController::testLibraries'
+  requirements:
+    _permission: 'access administration pages'
+
+newsmotivationmetrics.logging_config:
+  path: '/admin/config/development/thetruthperspective/logging'
+  defaults:
+    _form: '\Drupal\newsmotivationmetrics\Form\LoggingConfigForm'
+    _title: 'Platform Logging Configuration'
+  requirements:
+    _permission: 'administer site configuration'

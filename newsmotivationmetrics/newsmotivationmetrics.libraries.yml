@@ -1,0 +1,246 @@
+chart-js:
+  version: 1.x
+  css:
+    theme:
+      css/chart-style.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/chart-behavior.js: { weight: -8 }
+    # js/taxonomy-timeline-chart.js: { weight: -7 }  # Removed to prevent multi-select conflict
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+chart-test:
+  version: 1.x
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/chart-test.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+
+chart-debug:
+  version: 1.x
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/chart-debug.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
+
+chart-analytics:
+  version: 1.x
+  css:
+    theme:
+      css/chart-analytics.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/chart-analytics.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
+
+charts-base:
+  version: 1.x
+  css:
+    theme:
+      css/charts.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+  dependencies:
+    - core/drupal
+
+chart-libraries:
+  version: 1.x
+  js:
+    js/chart.umd.js: { minified: true, weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { minified: true, weight: -9 }
+  dependencies:
+    - core/drupal
+    - core/once
+
+chart-debug-console:
+  version: 1.x
+  css:
+    theme:
+      css/chart-style.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/chart-debug.js: { weight: -5 }
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+
+public-dashboard:
+  version: 1.x
+  js:
+    js/public-dashboard.js: { weight: -5 }
+  dependencies:
+    - newsmotivationmetrics/chart-libraries
+    - core/drupal
+    - core/once
+
+admin-dashboard:
+  version: 1.x
+  js:
+    js/admin-dashboard.js: { weight: -5 }
+  dependencies:
+    - newsmotivationmetrics/chart-libraries
+    - core/drupal
+    - core/once
+
+chart-blocks:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/chart-blocks.js: { weight: -8 }
+    js/news-motivation-timeline-orientation.js: { weight: -7 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+news-motivation-timeline:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/news-motivation-timeline-chart.js: { weight: -8 }
+    js/news-motivation-timeline-orientation.js: { weight: -7 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+news-source-timeline:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/news-source-timeline-chart.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+donation-support:
+  version: 1.x
+  css:
+    theme:
+      css/donation-support.css: {}
+  dependencies:
+    - core/drupal
+
+fullwidth-override:
+  css:
+    theme:
+      css/fullwidth-override.css: {}
+  dependencies:
+    - core/drupal
+
+news-sources-directory:
+  version: 1.x
+  css:
+    theme:
+      css/news-sources-directory.css: {}
+  dependencies:
+    - core/drupal
+
+activity-timeline-chart:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/activity-timeline-chart.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+bias-timeline:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/bias-timeline-chart.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+credibility-timeline:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/credibility-timeline-chart.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+sentiment-timeline:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/sentiment-timeline-chart.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once
+    - core/drupalSettings
+
+authoritarianism-timeline:
+  version: 1.x
+  css:
+    theme:
+      css/chart-styles.css: {}
+  js:
+    js/chart.umd.js: { weight: -10 }
+    js/chartjs-adapter-date-fns.bundle.min.js: { weight: -9 }
+    js/authoritarianism-timeline-chart.js: { weight: -8 }
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings

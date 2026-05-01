@@ -1,0 +1,62 @@
+{#
+/**
+ * @file
+ * Template for the Human Success dashboard.
+ *
+ * Available variables:
+ * - data: Array containing dashboard data including:
+ *   - total_users: Number of total users
+ *   - active_goals: Number of active goals
+ *   - completed_achievements: Number of completed achievements
+ *   - success_rate: Success rate percentage
+ *   - recent_activities: Array of recent activity strings
+ */
+#}
+<div class="humansuccess-dashboard">
+  <div class="dashboard-header">
+    <h1>{{ 'Human Success Dashboard'|t }}</h1>
+    <p class="dashboard-subtitle">{{ 'Track progress and celebrate achievements'|t }}</p>
+  </div>
+
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <div class="stat-number">{{ data.total_users }}</div>
+      <div class="stat-label">{{ 'Total Users'|t }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ data.active_goals }}</div>
+      <div class="stat-label">{{ 'Active Goals'|t }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ data.completed_achievements }}</div>
+      <div class="stat-label">{{ 'Completed Achievements'|t }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ data.success_rate }}%</div>
+      <div class="stat-label">{{ 'Success Rate'|t }}</div>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div class="recent-activities">
+      <h2>{{ 'Recent Activities'|t }}</h2>
+      {% if data.recent_activities %}
+        <ul class="activity-list">
+          {% for activity in data.recent_activities %}
+            <li class="activity-item">{{ activity }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>{{ 'No recent activities to display.'|t }}</p>
+      {% endif %}
+    </div>
+
+    <div class="quick-actions">
+      <h2>{{ 'Quick Actions'|t }}</h2>
+      <div class="action-buttons">
+        <a href="/human-success/metrics" class="btn btn-primary">{{ 'View Metrics'|t }}</a>
+        <a href="/node/add" class="btn btn-secondary">{{ 'Add Goal'|t }}</a>
+      </div>
+    </div>
+  </div>
+</div>

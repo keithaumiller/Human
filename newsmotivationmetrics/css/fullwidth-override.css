@@ -1,0 +1,132 @@
+/**
+ * Block-based metrics dashboard styling
+ * Clean approach using proper Drupal blocks within theme layout
+ */
+
+/* Ensure metrics blocks use available width within theme constraints */
+.metrics-fullwidth-page .metrics-dashboard-content {
+  width: 100%;
+  max-width: none;
+}
+
+/* Individual block styling for proper spacing */
+.metrics-fullwidth-page .news-metrics-header,
+.metrics-fullwidth-page .news-motivation-timeline-section,
+.metrics-fullwidth-page .news-source-timeline-section,
+.metrics-fullwidth-page .recent-activity-timeline-chart-block,
+.metrics-fullwidth-page .metrics-overview-sections,
+.metrics-fullwidth-page .methodology-explanation {
+  width: 100%;
+  margin-bottom: 2rem;
+  box-sizing: border-box;
+}
+
+/* Chart container should use full available width */
+.metrics-fullwidth-page .chart-container {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure timeline chart section uses full width */
+.metrics-fullwidth-page .news-motivation-timeline-section,
+.metrics-fullwidth-page .news-source-timeline-section,
+.metrics-fullwidth-page .recent-activity-timeline-chart-block {
+  width: 100%;
+  padding: 0;
+}
+
+/* Chart controls and content styling */
+.metrics-fullwidth-page .chart-controls,
+.metrics-fullwidth-page .chart-container {
+  width: 100%;
+}
+
+/* Overview sections grid layout */
+.metrics-fullwidth-page .metrics-overview-sections {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Responsive padding for readability */
+.metrics-fullwidth-page .news-metrics-header,
+.metrics-fullwidth-page .news-motivation-timeline-section > *:not(.chart-container),
+.metrics-fullwidth-page .news-source-timeline-section > *:not(.chart-container),
+.metrics-fullwidth-page .recent-activity-timeline-chart-block > *:not(.chart-container),
+.metrics-fullwidth-page .metrics-overview-sections,
+.metrics-fullwidth-page .methodology-explanation {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .metrics-fullwidth-page .news-metrics-header,
+  .metrics-fullwidth-page .news-motivation-timeline-section > *:not(.chart-container),
+  .metrics-fullwidth-page .news-source-timeline-section > *:not(.chart-container),
+  .metrics-fullwidth-page .recent-activity-timeline-chart-block > *:not(.chart-container),
+  .metrics-fullwidth-page .metrics-overview-sections,
+  .metrics-fullwidth-page .methodology-explanation {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Demo Disclaimer Styling */
+.demo-disclaimer-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid #17a2b8;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0 2rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.demo-disclaimer-section .demo-title {
+  color: #0056b3;
+  margin: 0 0 1rem 0;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.demo-disclaimer-section .demo-content {
+  color: #495057;
+  line-height: 1.6;
+}
+
+.demo-disclaimer-section .demo-content p {
+  margin-bottom: 0.8rem;
+}
+
+.demo-disclaimer-section .demo-content ul {
+  margin: 0.8rem 0;
+  padding-left: 1.5rem;
+}
+
+.demo-disclaimer-section .demo-content li {
+  margin-bottom: 0.4rem;
+}
+
+.demo-disclaimer-section .demo-content a {
+  color: #0056b3;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.demo-disclaimer-section .demo-content a:hover {
+  color: #003d82;
+  text-decoration: none;
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+  .metrics-fullwidth-page .news-metrics-header,
+  .metrics-fullwidth-page .news-motivation-timeline-section > *:not(.chart-container),
+  .metrics-fullwidth-page .news-source-timeline-section > *:not(.chart-container),
+  .metrics-fullwidth-page .recent-activity-timeline-chart-block > *:not(.chart-container),
+  .metrics-fullwidth-page .metrics-overview-sections,
+  .metrics-fullwidth-page .methodology-explanation {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}

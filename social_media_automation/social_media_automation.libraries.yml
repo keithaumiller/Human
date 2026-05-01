@@ -1,0 +1,10 @@
+content-preview:
+  version: 1.x
+  js:
+    js/content-preview.js: {}
+  css:
+    theme:
+      css/content-preview.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

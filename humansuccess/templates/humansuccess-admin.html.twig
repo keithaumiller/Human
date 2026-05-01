@@ -1,0 +1,95 @@
+{#
+/**
+ * @file
+ * Template for the Human Success admin dashboard.
+ *
+ * Available variables:
+ * - admin_data: Array containing admin data including:
+ *   - system_status: Current system status
+ *   - pending_reviews: Number of pending reviews
+ *   - flagged_content: Number of flagged content items
+ *   - system_metrics: Array of system performance metrics
+ *   - recent_logs: Array of recent log entries
+ */
+#}
+<div class="humansuccess-admin">
+  <div class="admin-header">
+    <h1>{{ 'Human Success Administration'|t }}</h1>
+    <p class="admin-subtitle">{{ 'System management and monitoring'|t }}</p>
+  </div>
+
+  <div class="admin-overview">
+    <div class="status-card {{ admin_data.system_status == 'Operational' ? 'status-good' : 'status-warning' }}">
+      <h3>{{ 'System Status'|t }}</h3>
+      <div class="status-value">{{ admin_data.system_status }}</div>
+    </div>
+
+    <div class="admin-stats">
+      <div class="admin-stat">
+        <div class="stat-number">{{ admin_data.pending_reviews }}</div>
+        <div class="stat-label">{{ 'Pending Reviews'|t }}</div>
+      </div>
+      <div class="admin-stat">
+        <div class="stat-number">{{ admin_data.flagged_content }}</div>
+        <div class="stat-label">{{ 'Flagged Content'|t }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-content">
+    <div class="admin-section">
+      <h2>{{ 'System Metrics'|t }}</h2>
+      {% if admin_data.system_metrics %}
+        <div class="system-metrics">
+          <div class="metric-item">
+            <span class="metric-label">{{ 'Uptime'|t }}</span>
+            <span class="metric-value">{{ admin_data.system_metrics.uptime }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">{{ 'Response Time'|t }}</span>
+            <span class="metric-value">{{ admin_data.system_metrics.response_time }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">{{ 'Error Rate'|t }}</span>
+            <span class="metric-value">{{ admin_data.system_metrics.error_rate }}</span>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="admin-section">
+      <h2>{{ 'Recent System Logs'|t }}</h2>
+      {% if admin_data.recent_logs %}
+        <ul class="log-list">
+          {% for log in admin_data.recent_logs %}
+            <li class="log-item">{{ log }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>{{ 'No recent logs to display.'|t }}</p>
+      {% endif %}
+    </div>
+
+    <div class="admin-actions">
+      <h2>{{ 'Quick Actions'|t }}</h2>
+      <div class="action-grid">
+        <a href="/admin/config/humansuccess" class="admin-action">
+          <h3>{{ 'Configuration'|t }}</h3>
+          <p>{{ 'Manage module settings'|t }}</p>
+        </a>
+        <a href="/admin/content/humansuccess" class="admin-action">
+          <h3>{{ 'Content Management'|t }}</h3>
+          <p>{{ 'Review and moderate content'|t }}</p>
+        </a>
+        <a href="/admin/reports/humansuccess" class="admin-action">
+          <h3>{{ 'Reports'|t }}</h3>
+          <p>{{ 'View detailed reports'|t }}</p>
+        </a>
+        <a href="/admin/users/humansuccess" class="admin-action">
+          <h3>{{ 'User Management'|t }}</h3>
+          <p>{{ 'Manage user accounts'|t }}</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

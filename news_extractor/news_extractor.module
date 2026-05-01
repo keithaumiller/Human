@@ -1,0 +1,1045 @@
+<?php
+
+/**
+ * @file
+ * News Extractor module - Enhanced architecture with separated services.
+ * 
+ * ARCHITECTURE:
+ * - ScrapingService (Sensors): Handles Diffbot API and content extraction
+ * - AIProcessingService (Processors): Handles Claude AI analysis and prompt building
+ * - DataProcessingService (Levers): Handles field updates, taxonomy, and formatting
+ * - NewsExtractionService (Orchestrator): Coordinates all services in pipeline
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\Entity\Node;
+
+/**
+ * Implements hook_help().
+ */
+function news_extractor_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.news_extractor':
+      return '<p>' . t('Enhanced news extraction with separated scraping, AI processing, and data management services.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_feeds_process_alter().
+ * Alter feed item data before it becomes a node.
+ */
+function news_extractor_feeds_process_alter(&$feed, $item, $entity_interface) {
+  \Drupal::logger('news_extractor')->info('Enhanced news_extractor module - feeds_process_alter triggered');
+
+  // Only process Article content type
+  if ($entity_interface->getTarget()->bundle() !== 'article') {
+    return;
+  }
+
+  $title_to_check = $item['title'] ?? '';
+  $link_to_check = $item['link'] ?? '';
+
+  // Use scraping service to validate URLs
+  /** @var \Drupal\news_extractor\Service\ScrapingService $scraping_service */
+  $scraping_service = \Drupal::service('news_extractor.scraping');
+
+  // Skip invalid URLs
+  if (!empty($item['link']) && !$scraping_service->isValidArticleUrl($item['link'])) {
+    \Drupal::logger('news_extractor')->info('Skipping invalid article URL: @url', [
+      '@url' => $item['link'],
+    ]);
+    $feed->skipItem($item);
+    return;
+  }
+
+  // Skip items with blocked content or invalid titles
+  if (_news_extractor_has_blocked_content($title_to_check, $link_to_check) ||
+      _news_extractor_has_invalid_title($title_to_check)) {
+    $feed->skipItem($item);
+    return;
+  }
+
+  // Extract news source from feed data using service
+  /** @var \Drupal\news_extractor\Service\DataProcessingService $data_processing_service */
+  $data_processing_service = \Drupal::service('news_extractor.data_processing');
+  $news_source = $data_processing_service->extractNewsSourceFromFeed($item);
+  
+  if (!empty($news_source) && $entity_interface->getTarget()->hasField('field_news_source')) {
+    $entity_interface->getTarget()->set('field_news_source', $news_source);
+    \Drupal::logger('news_extractor')->info('Set news source from feed: @source', [
+      '@source' => $news_source,
+    ]);
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ * Process new article entities with daily limit checking.
+ */
+function news_extractor_entity_insert(EntityInterface $entity) {
+  if ($entity->bundle() === 'article' && $entity->hasField('field_original_url')) {
+    // Get URL with proper null checking
+    $url_field = $entity->get('field_original_url');
+    if ($url_field->isEmpty()) {
+      \Drupal::logger('news_extractor')->warning('Article created without URL: @title (ID: @id)', [
+        '@title' => $entity->getTitle(),
+        '@id' => $entity->id(),
+      ]);
+      return;
+    }
+    
+    $original_url = $url_field->uri;
+    
+    if (!empty($original_url) && filter_var($original_url, FILTER_VALIDATE_URL)) {
+      // STEP 1: Extract preliminary news source for daily limit checking
+      $preliminary_news_source = _news_extractor_get_preliminary_news_source($entity, $original_url);
+      
+      // STEP 2: Check daily limits before processing
+      /** @var \Drupal\news_extractor\Service\DailyLimitService $daily_limit_service */
+      $daily_limit_service = \Drupal::service('news_extractor.daily_limit');
+      
+      if (!$daily_limit_service->isProcessingAllowed($preliminary_news_source)) {
+        \Drupal::logger('news_extractor')->info('Daily limit reached for source @source - skipping article: @title (ID: @id)', [
+          '@source' => $preliminary_news_source,
+          '@title' => $entity->getTitle(),
+          '@id' => $entity->id(),
+        ]);
+        
+        // Set a field to indicate this article was skipped due to daily limit
+        if ($entity->hasField('field_processing_notes')) {
+          $processing_note = "Processing skipped on " . date('Y-m-d H:i:s') . " - daily limit reached for source: {$preliminary_news_source}";
+          $entity->set('field_processing_notes', $processing_note);
+          $entity->save();
+        }
+        
+        return;
+      }
+      
+      // STEP 3: Increment daily count before processing
+      $daily_limit_service->incrementDailyCount($preliminary_news_source);
+      
+      // STEP 4: Process the article using orchestrator service
+      // Note: News source extraction is refined during Diffbot scraping in ScrapingService::updateMetadataFields()
+      // This ensures we have the actual siteName from Diffbot API for accurate source identification
+      
+      /** @var \Drupal\news_extractor\Service\NewsExtractionService $extraction_service */
+      $extraction_service = \Drupal::service('news_extractor.extraction');
+      $extraction_service->processArticle($entity, $original_url);
+    } else {
+      \Drupal::logger('news_extractor')->warning('Article created with invalid URL: @url for @title (ID: @id)', [
+        '@url' => $original_url,
+        '@title' => $entity->getTitle(),
+        '@id' => $entity->id(),
+      ]);
+    }
+  }
+}
+
+/**
+ * Main extraction function using service architecture.
+ * 
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The article entity to process.
+ * @param string $url
+ *   The article URL.
+ * 
+ * @return bool
+ *   TRUE if processing was successful.
+ */
+function _news_extractor_extract_content(EntityInterface $entity, $url) {
+  /** @var \Drupal\news_extractor\Service\NewsExtractionService $extraction_service */
+  $extraction_service = \Drupal::service('news_extractor.extraction');
+  
+  return $extraction_service->processArticle($entity, $url);
+}
+
+/**
+ * Bulk process articles using the new service architecture.
+ * 
+ * @param int $limit
+ *   Maximum number of articles to process.
+ * @param string $processing_type
+ *   Type of processing: 'full', 'scrape_only', 'analyze_only', 'reprocess'.
+ * 
+ * @return array
+ *   Processing statistics.
+ */
+function news_extractor_bulk_process_articles($limit = 20, $processing_type = 'full') {
+  /** @var \Drupal\news_extractor\Service\NewsExtractionService $extraction_service */
+  $extraction_service = \Drupal::service('news_extractor.extraction');
+  
+  $stats = [
+    'processed' => 0,
+    'successful' => 0,
+    'failed' => 0,
+    'skipped' => 0,
+  ];
+
+  // Find articles based on processing type
+  $query = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->accessCheck(FALSE)
+    ->range(0, $limit);
+
+  // Customize query based on processing type
+  switch ($processing_type) {
+    case 'scrape_only':
+      // Articles with URLs but no scraped data
+      $query->condition('field_original_url.uri', '', '<>');
+      $or_group = $query->orConditionGroup();
+      $or_group->condition('field_json_scraped_article_data.value', '', '=');
+      $or_group->condition('field_json_scraped_article_data.value', NULL, 'IS NULL');
+      $query->condition($or_group);
+      break;
+
+    case 'analyze_only':
+      // Articles with scraped data but no AI analysis
+      $query->condition('field_json_scraped_article_data.value', '', '<>');
+      $or_group = $query->orConditionGroup();
+      $or_group->condition('field_ai_raw_response.value', '', '=');
+      $or_group->condition('field_ai_raw_response.value', NULL, 'IS NULL');
+      $query->condition($or_group);
+      break;
+
+    case 'reprocess':
+      // Articles with AI responses for reprocessing
+      $query->condition('field_ai_raw_response.value', '', '<>');
+      break;
+
+    case 'full':
+    default:
+      // Articles with URLs but incomplete processing
+      $query->condition('field_original_url.uri', '', '<>');
+      break;
+  }
+
+  $nids = $query->execute();
+
+  foreach ($nids as $nid) {
+    $node = Node::load($nid);
+    if (!$node) {
+      $stats['skipped']++;
+      continue;
+    }
+
+    $stats['processed']++;
+    $success = FALSE;
+
+    try {
+      switch ($processing_type) {
+        case 'scrape_only':
+          $url = $node->get('field_original_url')->uri;
+          $success = $extraction_service->scrapeArticleOnly($node, $url);
+          break;
+
+        case 'analyze_only':
+          $success = $extraction_service->analyzeArticleOnly($node);
+          break;
+
+        case 'reprocess':
+          $success = $extraction_service->reprocessArticle($node);
+          break;
+
+        case 'full':
+        default:
+          $url = $node->get('field_original_url')->uri;
+          $success = $extraction_service->processArticle($node, $url);
+          break;
+      }
+
+      if ($success) {
+        $stats['successful']++;
+      } else {
+        $stats['failed']++;
+      }
+
+    } catch (\Exception $e) {
+      $stats['failed']++;
+      \Drupal::logger('news_extractor')->error('Error processing node @nid: @error', [
+        '@nid' => $nid,
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  \Drupal::logger('news_extractor')->info('Bulk processing (@type) complete: @stats', [
+    '@type' => $processing_type,
+    '@stats' => json_encode($stats),
+  ]);
+
+  return $stats;
+}
+
+/**
+ * Get processing status for articles.
+ * 
+ * @param int $limit
+ *   Number of articles to check.
+ * 
+ * @return array
+ *   Status information for articles.
+ */
+function news_extractor_get_processing_status($limit = 10) {
+  /** @var \Drupal\news_extractor\Service\NewsExtractionService $extraction_service */
+  $extraction_service = \Drupal::service('news_extractor.extraction');
+  
+  $nids = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->accessCheck(FALSE)
+    ->sort('created', 'DESC')
+    ->range(0, $limit)
+    ->execute();
+
+  $status_reports = [];
+  foreach ($nids as $nid) {
+    $node = Node::load($nid);
+    if ($node) {
+      $status_reports[] = $extraction_service->getProcessingStatus($node);
+    }
+  }
+
+  return $status_reports;
+}
+
+/**
+ * Helper function to check for blocked content in title and link.
+ */
+function _news_extractor_has_blocked_content($title, $link) {
+  $blocked_strings = [
+    'comparecards.com',
+    'fool.com',
+    'lendingtree.com',
+  ];
+
+  foreach ($blocked_strings as $str) {
+    if (stripos($title, $str) !== FALSE) {
+      \Drupal::logger('news_extractor')->info('Skipping blocked string in title: @title', [
+        '@title' => $title,
+      ]);
+      return TRUE;
+    }
+    
+    if (stripos($link, $str) !== FALSE) {
+      \Drupal::logger('news_extractor')->info('Skipping blocked string in link: @url', [
+        '@url' => $link,
+      ]);
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Helper function to check for invalid titles.
+ */
+function _news_extractor_has_invalid_title($title) {
+  // Skip items with missing or empty titles
+  if (empty($title) || trim($title) == '') {
+    \Drupal::logger('news_extractor')->info('Skipping item with missing or empty title');
+    return TRUE;
+  }
+
+  // Skip items with very short titles
+  if (strlen(trim($title)) < 10) {
+    \Drupal::logger('news_extractor')->info('Skipping item with very short title: @title', [
+      '@title' => $title,
+    ]);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implements hook_cron().
+ * 
+ * Automated reprocessing of failed articles and feed maintenance:
+ * 1. Check published articles for post-processor conditions
+ * 2. Find unpublished articles with processing failures and reprocess them
+ * 3. Check for articles missing assessment fields and reprocess them
+ * 4. Detect and unlock stuck feed imports (locked > 30 minutes)
+ */
+function news_extractor_cron() {
+  $logger = \Drupal::logger('news_extractor');
+  $logger->info('Starting news_extractor automated reprocessing cron job');
+
+  // Get extraction service
+  /** @var \Drupal\news_extractor\Service\NewsExtractionService $extraction_service */
+  $extraction_service = \Drupal::service('news_extractor.extraction');
+
+  $stats = [
+    'published_checked' => 0,
+    'articles_unpublished' => 0,
+    'unpublished_found' => 0,
+    'reprocessed_successfully' => 0,
+    'reprocessing_failed' => 0,
+    'assessment_missing' => 0,
+    'assessment_reprocessed' => 0,
+  ];
+
+  // STEP 1: Check published articles for post-processor conditions
+  $logger->info('Step 1: Checking published articles for post-processor conditions');
+  
+  // Find published articles that might need to be unpublished
+  // First, get articles with "Analysis is Pending" specifically
+  $pending_query = \Drupal::database()->select('node_field_data', 'n');
+  $pending_query->leftJoin('node__field_motivation_analysis', 'ma', 'n.nid = ma.entity_id');
+  $pending_query->fields('n', ['nid']);
+  $pending_query->condition('n.type', 'article');
+  $pending_query->condition('n.status', 1); // Only published articles
+  $pending_query->condition('ma.field_motivation_analysis_value', '%Analysis is Pending%', 'LIKE');
+  $pending_nids = $pending_query->execute()->fetchCol();
+  
+  $logger->info('Found @count published articles with "Analysis is Pending" content', ['@count' => count($pending_nids)]);
+  
+  // Also get general published articles (but limit these)
+  $published_query = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->condition('status', 1) // Only published articles
+    ->accessCheck(FALSE);
+  
+  $all_published_nids = $published_query->execute();
+  
+  // Combine and deduplicate: prioritize pending articles, then add others up to limit
+  $combined_nids = array_unique(array_merge($pending_nids, array_slice($all_published_nids, 0, 50 - count($pending_nids))));
+  $stats['published_checked'] = count($combined_nids);
+  
+  $logger->info('Checking @count total published articles (@pending with pending analysis + others)', [
+    '@count' => count($combined_nids),
+    '@pending' => count($pending_nids)
+  ]);
+
+  // Check published articles for unpublishing conditions
+  $published_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($combined_nids);
+  
+  foreach ($published_nodes as $node) {
+    try {
+      // Get the data processing service to run post-processors
+      $data_processing_service = \Drupal::service('news_extractor.data_processing');
+      
+      // Check if the article should be unpublished by running post-processors
+      $original_status = $node->isPublished();
+      
+      // Run post-processors (this may unpublish the article)
+      $reflection = new \ReflectionClass($data_processing_service);
+      $method = $reflection->getMethod('postProcessPublishingStatus');
+      $method->setAccessible(true);
+      $method->invoke($data_processing_service, $node);
+      
+      // Save if status changed
+      if ($original_status !== $node->isPublished()) {
+        $node->save();
+        $stats['articles_unpublished']++;
+        $logger->info('Unpublished article @nid due to post-processor conditions: @title', [
+          '@nid' => $node->id(),
+          '@title' => $node->getTitle(),
+        ]);
+      }
+      
+    } catch (\Exception $e) {
+      $logger->error('Error checking article @nid for post-processor conditions: @error', [
+        '@nid' => $node->id(),
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  // STEP 2: Find unpublished articles that need reprocessing (only articles less than 3 days old)
+  $logger->info('Step 2: Finding unpublished articles for reprocessing (less than 3 days old)');
+  
+  // Only reprocess articles created within the last 3 days to prevent infinite retrying
+  $three_days_ago = \Drupal::time()->getRequestTime() - (3 * 24 * 60 * 60);
+  
+  $unpublished_query = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->condition('status', 0) // Only unpublished articles
+    ->condition('field_original_url.uri', '', '<>') // Must have URL for reprocessing
+    ->condition('created', $three_days_ago, '>') // Only articles less than 3 days old
+    ->accessCheck(FALSE);
+  
+  $unpublished_nids = $unpublished_query->execute();
+  $stats['unpublished_found'] = count($unpublished_nids);
+  
+  $logger->info('Found @count unpublished articles (less than 3 days old) for reprocessing', ['@count' => $stats['unpublished_found']]);
+
+  // Reprocess unpublished articles (limit to 20 per run to avoid timeouts)
+  $reprocess_limit = min(20, count($unpublished_nids));
+  $unpublished_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple(array_slice($unpublished_nids, 0, $reprocess_limit));
+  
+  foreach ($unpublished_nodes as $node) {
+    try {
+      if (!$node->hasField('field_original_url') || $node->get('field_original_url')->isEmpty()) {
+        $logger->warning('Node @nid has no URL for reprocessing', ['@nid' => $node->id()]);
+        continue;
+      }
+      
+      $url = $node->get('field_original_url')->uri;
+      $logger->info('Reprocessing unpublished article @nid: @title', [
+        '@nid' => $node->id(),
+        '@title' => $node->getTitle(),
+      ]);
+      
+      // Run through complete processing pipeline
+      $success = $extraction_service->processArticle($node, $url);
+      
+      if ($success) {
+        $stats['reprocessed_successfully']++;
+        $logger->info('Successfully reprocessed article @nid', ['@nid' => $node->id()]);
+      } else {
+        $stats['reprocessing_failed']++;
+        $logger->warning('Failed to reprocess article @nid', ['@nid' => $node->id()]);
+      }
+      
+    } catch (\Exception $e) {
+      $stats['reprocessing_failed']++;
+      $logger->error('Error reprocessing article @nid: @error', [
+        '@nid' => $node->id(),
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  // STEP 3: Check for articles missing assessment fields (published, recent articles only)
+  $logger->info('Step 3: Checking for articles missing assessment fields (last 14 days)');
+  
+  $fourteen_days_ago = \Drupal::time()->getRequestTime() - (14 * 24 * 60 * 60);
+  
+  // Get baseline statistics BEFORE processing
+  $baseline_stats = _news_extractor_get_assessment_field_statistics($fourteen_days_ago);
+  $logger->info('Assessment field statistics BEFORE processing (last 14 days): @stats', [
+    '@stats' => json_encode($baseline_stats),
+  ]);
+  $logger->info('BEFORE: Missing authoritarianism: @auth, Missing credibility: @cred, Missing bias: @bias, Missing sentiment: @sentiment, Total articles: @total', [
+    '@auth' => $baseline_stats['missing_authoritarianism'],
+    '@cred' => $baseline_stats['missing_credibility'],
+    '@bias' => $baseline_stats['missing_bias'],
+    '@sentiment' => $baseline_stats['missing_sentiment'],
+    '@total' => $baseline_stats['total_articles'],
+  ]);
+  
+  // Create OR condition for missing any assessment field
+  $missing_assessment_group = \Drupal::entityQuery('node')->orConditionGroup();
+  
+  // Check for missing authoritarianism score
+  $auth_missing = \Drupal::entityQuery('node')->orConditionGroup()
+    ->condition('field_authoritarianism_score', NULL, 'IS NULL')
+    ->condition('field_authoritarianism_score', '', '=');
+  $missing_assessment_group->condition($auth_missing);
+  
+  // Check for missing credibility score
+  $cred_missing = \Drupal::entityQuery('node')->orConditionGroup()
+    ->condition('field_credibility_score', NULL, 'IS NULL')
+    ->condition('field_credibility_score', '', '=');
+  $missing_assessment_group->condition($cred_missing);
+  
+  // Check for missing bias rating
+  $bias_missing = \Drupal::entityQuery('node')->orConditionGroup()
+    ->condition('field_bias_rating', NULL, 'IS NULL')
+    ->condition('field_bias_rating', '', '=');
+  $missing_assessment_group->condition($bias_missing);
+  
+  // Check for missing sentiment score
+  $sentiment_missing = \Drupal::entityQuery('node')->orConditionGroup()
+    ->condition('field_article_sentiment_score', NULL, 'IS NULL')
+    ->condition('field_article_sentiment_score', '', '=');
+  $missing_assessment_group->condition($sentiment_missing);
+  
+  $assessment_query = \Drupal::entityQuery('node')
+    ->condition('type', 'article')
+    ->condition('status', 1) // Only published articles
+    ->condition('created', $fourteen_days_ago, '>') // Only recent articles
+    ->condition('field_original_url.uri', '', '<>') // Must have URL for reprocessing
+    ->condition($missing_assessment_group)
+    ->accessCheck(FALSE)
+    ->range(0, 15); // Limit to 15 per cron run
+  
+  $assessment_nids = $assessment_query->execute();
+  $stats['assessment_missing'] = count($assessment_nids);
+  
+  $logger->info('Found @count published articles missing assessment fields for reprocessing', ['@count' => $stats['assessment_missing']]);
+  
+  // Reprocess articles missing assessment fields
+  $assessment_nodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($assessment_nids);
+  
+  foreach ($assessment_nodes as $node) {
+    try {
+      $missing_fields = [];
+      if ($node->hasField('field_authoritarianism_score') && $node->get('field_authoritarianism_score')->isEmpty()) {
+        $missing_fields[] = 'authoritarianism';
+      }
+      if ($node->hasField('field_credibility_score') && $node->get('field_credibility_score')->isEmpty()) {
+        $missing_fields[] = 'credibility';
+      }
+      if ($node->hasField('field_bias_rating') && $node->get('field_bias_rating')->isEmpty()) {
+        $missing_fields[] = 'bias';
+      }
+      if ($node->hasField('field_article_sentiment_score') && $node->get('field_article_sentiment_score')->isEmpty()) {
+        $missing_fields[] = 'sentiment';
+      }
+      
+      if (empty($missing_fields)) {
+        continue; // Skip if no missing fields
+      }
+      
+      $url = $node->get('field_original_url')->uri;
+      $logger->info('Reprocessing article @nid for missing assessment fields (@fields): @title', [
+        '@nid' => $node->id(),
+        '@fields' => implode(', ', $missing_fields),
+        '@title' => $node->getTitle(),
+      ]);
+      
+      // Run through complete processing pipeline to get all assessment fields
+      $success = $extraction_service->processArticle($node, $url);
+      
+      if ($success) {
+        $stats['assessment_reprocessed']++;
+        $logger->info('Successfully reprocessed assessment fields for article @nid', ['@nid' => $node->id()]);
+      } else {
+        $logger->warning('Failed to reprocess assessment fields for article @nid', ['@nid' => $node->id()]);
+      }
+      
+    } catch (\Exception $e) {
+      $logger->error('Error reprocessing assessment fields for article @nid: @error', [
+        '@nid' => $node->id(),
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+  
+  // Get updated statistics AFTER processing
+  $updated_stats = _news_extractor_get_assessment_field_statistics($fourteen_days_ago);
+  $logger->info('Assessment field statistics AFTER processing (last 14 days): @stats', [
+    '@stats' => json_encode($updated_stats),
+  ]);
+  $logger->info('AFTER: Missing authoritarianism: @auth, Missing credibility: @cred, Missing bias: @bias, Missing sentiment: @sentiment, Total articles: @total', [
+    '@auth' => $updated_stats['missing_authoritarianism'],
+    '@cred' => $updated_stats['missing_credibility'],
+    '@bias' => $updated_stats['missing_bias'],
+    '@sentiment' => $updated_stats['missing_sentiment'],
+    '@total' => $updated_stats['total_articles'],
+  ]);
+  
+  // Calculate improvements
+  $improvements = [
+    'authoritarianism_fixed' => $baseline_stats['missing_authoritarianism'] - $updated_stats['missing_authoritarianism'],
+    'credibility_fixed' => $baseline_stats['missing_credibility'] - $updated_stats['missing_credibility'],
+    'bias_fixed' => $baseline_stats['missing_bias'] - $updated_stats['missing_bias'],
+    'sentiment_fixed' => $baseline_stats['missing_sentiment'] - $updated_stats['missing_sentiment'],
+  ];
+  
+  $total_fields_fixed = array_sum($improvements);
+  $logger->info('Assessment field improvements: Fixed @auth authoritarianism, @cred credibility, @bias bias, @sentiment sentiment scores (Total: @total field fixes)', [
+    '@auth' => $improvements['authoritarianism_fixed'],
+    '@cred' => $improvements['credibility_fixed'],
+    '@bias' => $improvements['bias_fixed'],
+    '@sentiment' => $improvements['sentiment_fixed'],
+    '@total' => $total_fields_fixed,
+  ]);
+  
+  // Store improvement stats for final summary
+  $stats['assessment_improvements'] = $improvements;
+  $stats['total_fields_fixed'] = $total_fields_fixed;
+
+  // STEP 4: Check for stuck feed imports and unlock them
+  $logger->info('Step 4: Checking for stuck feed imports');
+  
+  $stuck_feeds = _news_extractor_check_stuck_feeds();
+  $stats['stuck_feeds_found'] = count($stuck_feeds);
+  $stats['stuck_feeds_unlocked'] = 0;
+  
+  foreach ($stuck_feeds as $feed_info) {
+    try {
+      if (_news_extractor_unlock_stuck_feed($feed_info)) {
+        $stats['stuck_feeds_unlocked']++;
+        $logger->info('Unlocked stuck feed: @feed (locked for @duration minutes)', [
+          '@feed' => $feed_info['title'],
+          '@duration' => $feed_info['lock_duration_minutes'],
+        ]);
+      }
+    } catch (\Exception $e) {
+      $logger->error('Error unlocking stuck feed @feed: @error', [
+        '@feed' => $feed_info['title'],
+        '@error' => $e->getMessage(),
+      ]);
+    }
+  }
+
+  // STEP 5: Daily limit cleanup and reset
+  $logger->info('Step 5: Daily limit maintenance and cleanup');
+  
+  /** @var \Drupal\news_extractor\Service\DailyLimitService $daily_limit_service */
+  $daily_limit_service = \Drupal::service('news_extractor.daily_limit');
+  
+  // Clean up old records (older than 7 days)
+  $daily_limit_service->resetDailyCounts();
+  
+  // Log current daily statistics
+  $today_counts = $daily_limit_service->getAllDailyCounts();
+  $sources_at_limit = 0;
+  $total_processed_today = 0;
+  
+  foreach ($today_counts as $source => $data) {
+    $total_processed_today += $data['count'];
+    if ($data['at_limit']) {
+      $sources_at_limit++;
+    }
+  }
+  
+  $stats['daily_limit_sources_tracked'] = count($today_counts);
+  $stats['daily_limit_sources_at_limit'] = $sources_at_limit;
+  $stats['daily_limit_total_processed_today'] = $total_processed_today;
+  
+  $logger->info('Daily limit status: @tracked sources tracked, @at_limit at their daily limit, @total articles processed today', [
+    '@tracked' => count($today_counts),
+    '@at_limit' => $sources_at_limit,
+    '@total' => $total_processed_today,
+  ]);
+
+  // Log final statistics
+  $logger->info('News extractor cron job completed. Statistics: @stats', [
+    '@stats' => json_encode($stats),
+  ]);
+
+  // Also log human-readable summary
+  $logger->info('Cron summary: Checked @checked published articles, unpublished @unpublished, found @found unpublished articles, reprocessed @success successfully, @failed failed, found @assessment_missing articles missing assessment fields, reprocessed @assessment_reprocessed assessment fields, fixed @total_fields assessment field gaps, found @stuck_found stuck feeds, unlocked @stuck_unlocked feeds, tracking @tracked_sources news sources, @sources_at_limit at daily limit, @daily_total processed today', [
+    '@checked' => $stats['published_checked'],
+    '@unpublished' => $stats['articles_unpublished'],
+    '@found' => $stats['unpublished_found'],
+    '@success' => $stats['reprocessed_successfully'],
+    '@failed' => $stats['reprocessing_failed'],
+    '@assessment_missing' => $stats['assessment_missing'],
+    '@assessment_reprocessed' => $stats['assessment_reprocessed'],
+    '@total_fields' => $stats['total_fields_fixed'] ?? 0,
+    '@stuck_found' => $stats['stuck_feeds_found'],
+    '@stuck_unlocked' => $stats['stuck_feeds_unlocked'],
+    '@tracked_sources' => $stats['daily_limit_sources_tracked'] ?? 0,
+    '@sources_at_limit' => $stats['daily_limit_sources_at_limit'] ?? 0,
+    '@daily_total' => $stats['daily_limit_total_processed_today'] ?? 0,
+  ]);
+}
+
+/**
+ * Get comprehensive statistics for assessment field coverage.
+ *
+ * @param int $since_timestamp
+ *   Only count articles created since this timestamp.
+ *
+ * @return array
+ *   Array containing counts of missing assessment fields and totals.
+ */
+function _news_extractor_get_assessment_field_statistics($since_timestamp) {
+  $stats = [
+    'missing_authoritarianism' => 0,
+    'missing_credibility' => 0,
+    'missing_bias' => 0,
+    'missing_sentiment' => 0,
+    'total_articles' => 0,
+  ];
+  
+  // Base query for published articles since timestamp
+  $base_query_conditions = [
+    'type' => 'article',
+    'status' => 1,
+    'created' => [$since_timestamp, '>'],
+  ];
+  
+  // Count total articles
+  $total_query = \Drupal::entityQuery('node');
+  foreach ($base_query_conditions as $field => $condition) {
+    if (is_array($condition)) {
+      $total_query->condition($field, $condition[0], $condition[1]);
+    } else {
+      $total_query->condition($field, $condition);
+    }
+  }
+  $total_query->accessCheck(FALSE);
+  $stats['total_articles'] = $total_query->count()->execute();
+  
+  // Count missing authoritarianism scores
+  $auth_query = \Drupal::entityQuery('node');
+  foreach ($base_query_conditions as $field => $condition) {
+    if (is_array($condition)) {
+      $auth_query->condition($field, $condition[0], $condition[1]);
+    } else {
+      $auth_query->condition($field, $condition);
+    }
+  }
+  $auth_missing_group = $auth_query->orConditionGroup()
+    ->condition('field_authoritarianism_score', NULL, 'IS NULL')
+    ->condition('field_authoritarianism_score', '', '=');
+  $auth_query->condition($auth_missing_group)->accessCheck(FALSE);
+  $stats['missing_authoritarianism'] = $auth_query->count()->execute();
+  
+  // Count missing credibility scores
+  $cred_query = \Drupal::entityQuery('node');
+  foreach ($base_query_conditions as $field => $condition) {
+    if (is_array($condition)) {
+      $cred_query->condition($field, $condition[0], $condition[1]);
+    } else {
+      $cred_query->condition($field, $condition);
+    }
+  }
+  $cred_missing_group = $cred_query->orConditionGroup()
+    ->condition('field_credibility_score', NULL, 'IS NULL')
+    ->condition('field_credibility_score', '', '=');
+  $cred_query->condition($cred_missing_group)->accessCheck(FALSE);
+  $stats['missing_credibility'] = $cred_query->count()->execute();
+  
+  // Count missing bias ratings
+  $bias_query = \Drupal::entityQuery('node');
+  foreach ($base_query_conditions as $field => $condition) {
+    if (is_array($condition)) {
+      $bias_query->condition($field, $condition[0], $condition[1]);
+    } else {
+      $bias_query->condition($field, $condition);
+    }
+  }
+  $bias_missing_group = $bias_query->orConditionGroup()
+    ->condition('field_bias_rating', NULL, 'IS NULL')
+    ->condition('field_bias_rating', '', '=');
+  $bias_query->condition($bias_missing_group)->accessCheck(FALSE);
+  $stats['missing_bias'] = $bias_query->count()->execute();
+  
+  // Count missing sentiment scores
+  $sentiment_query = \Drupal::entityQuery('node');
+  foreach ($base_query_conditions as $field => $condition) {
+    if (is_array($condition)) {
+      $sentiment_query->condition($field, $condition[0], $condition[1]);
+    } else {
+      $sentiment_query->condition($field, $condition);
+    }
+  }
+  $sentiment_missing_group = $sentiment_query->orConditionGroup()
+    ->condition('field_article_sentiment_score', NULL, 'IS NULL')
+    ->condition('field_article_sentiment_score', '', '=');
+  $sentiment_query->condition($sentiment_missing_group)->accessCheck(FALSE);
+  $stats['missing_sentiment'] = $sentiment_query->count()->execute();
+  
+  return $stats;
+}
+
+/**
+ * Check for stuck feed imports and return information about them.
+ * 
+ * A feed is considered "stuck" if it has been locked for more than 30 minutes,
+ * which typically indicates a failed or interrupted import process.
+ *
+ * @return array
+ *   Array of feed information for stuck feeds.
+ */
+function _news_extractor_check_stuck_feeds() {
+  $stuck_feeds = [];
+  
+  // Check if Feeds module is available
+  if (!\Drupal::moduleHandler()->moduleExists('feeds')) {
+    return $stuck_feeds;
+  }
+  
+  try {
+    $current_time = \Drupal::time()->getRequestTime();
+    $stuck_threshold = 30 * 60; // 30 minutes in seconds
+    
+    // First, let's check what columns exist in the feeds_feed table
+    $database = \Drupal::database();
+    $schema = $database->schema();
+    
+    if (!$schema->tableExists('feeds_feed')) {
+      \Drupal::logger('news_extractor')->info('feeds_feed table does not exist, skipping stuck feed check');
+      return $stuck_feeds;
+    }
+    
+    // Check if we have a lock-related column by trying each possibility
+    $lock_column = null;
+    $possible_lock_columns = ['locked', 'lock', 'importing'];
+    
+    foreach ($possible_lock_columns as $column) {
+      if ($schema->fieldExists('feeds_feed', $column)) {
+        $lock_column = $column;
+        \Drupal::logger('news_extractor')->info('Found lock column: @column in feeds_feed table', [
+          '@column' => $column,
+        ]);
+        break;
+      }
+    }
+    
+    if (!$lock_column) {
+      \Drupal::logger('news_extractor')->info('No lock column found in feeds_feed table, skipping stuck feed check');
+      return $stuck_feeds;
+    }
+    
+    // Query the feeds_feed table for locked feeds using the correct column
+    $query = $database->select('feeds_feed', 'f')
+      ->fields('f', ['fid', 'title', $lock_column])
+      ->condition('f.' . $lock_column, 0, '>'); // locked > 0 means feed is locked
+    
+    $result = $query->execute();
+    
+    foreach ($result as $feed_data) {
+      $lock_timestamp = $feed_data->{$lock_column};
+      $lock_duration = $current_time - $lock_timestamp;
+      
+      // Consider feed stuck if locked for more than threshold
+      if ($lock_duration > $stuck_threshold) {
+        $stuck_feeds[] = [
+          'fid' => $feed_data->fid,
+          'title' => $feed_data->title,
+          'locked_timestamp' => $lock_timestamp,
+          'lock_duration_seconds' => $lock_duration,
+          'lock_duration_minutes' => round($lock_duration / 60, 1),
+          'lock_column' => $lock_column,
+        ];
+      }
+    }
+    
+    if (!empty($stuck_feeds)) {
+      \Drupal::logger('news_extractor')->warning('Found @count stuck feeds (locked > 30 minutes)', [
+        '@count' => count($stuck_feeds),
+      ]);
+    }
+    
+  } catch (\Exception $e) {
+    \Drupal::logger('news_extractor')->error('Error checking for stuck feeds: @error', [
+      '@error' => $e->getMessage(),
+    ]);
+  }
+  
+  return $stuck_feeds;
+}
+
+/**
+ * Unlock a stuck feed by resetting its lock status.
+ * 
+ * @param array $feed_info
+ *   Feed information array from _news_extractor_check_stuck_feeds().
+ *
+ * @return bool
+ *   TRUE if feed was successfully unlocked.
+ */
+function _news_extractor_unlock_stuck_feed($feed_info) {
+  // Check if Feeds module is available
+  if (!\Drupal::moduleHandler()->moduleExists('feeds')) {
+    return FALSE;
+  }
+  
+  try {
+    $database = \Drupal::database();
+    
+    // Use the lock column determined during stuck feed detection
+    $lock_column = isset($feed_info['lock_column']) ? $feed_info['lock_column'] : 'locked';
+    
+    // Reset the lock timestamp to 0 (unlocked)
+    $result = $database->update('feeds_feed')
+      ->fields([$lock_column => 0])
+      ->condition('fid', $feed_info['fid'])
+      ->execute();
+    
+    if ($result) {
+      \Drupal::logger('news_extractor')->info('Successfully unlocked stuck feed: @title (FID: @fid, was locked for @duration minutes, column: @column)', [
+        '@title' => $feed_info['title'],
+        '@fid' => $feed_info['fid'],
+        '@duration' => $feed_info['lock_duration_minutes'],
+        '@column' => $lock_column,
+      ]);
+      
+      // Optional: Trigger feed import after unlocking
+      // This can help restart the import process automatically
+      try {
+        $feed = \Drupal::entityTypeManager()->getStorage('feeds_feed')->load($feed_info['fid']);
+        if ($feed) {
+          // Queue the feed for import on next cron run
+          $feed->startCronImport();
+          \Drupal::logger('news_extractor')->info('Queued unlocked feed for import: @title', [
+            '@title' => $feed_info['title'],
+          ]);
+        }
+      } catch (\Exception $e) {
+        // Log but don't fail if we can't queue the import
+        \Drupal::logger('news_extractor')->warning('Unlocked feed @title but could not queue import: @error', [
+          '@title' => $feed_info['title'],
+          '@error' => $e->getMessage(),
+        ]);
+      }
+      
+      return TRUE;
+    }
+    
+  } catch (\Exception $e) {
+    \Drupal::logger('news_extractor')->error('Error unlocking stuck feed @title (FID: @fid): @error', [
+      '@title' => $feed_info['title'],
+      '@fid' => $feed_info['fid'],
+      '@error' => $e->getMessage(),
+    ]);
+  }
+  
+  return FALSE;
+}
+
+/**
+ * Get preliminary news source for daily limit checking.
+ * 
+ * This function extracts news source from available entity data before
+ * full Diffbot processing to enable early daily limit checking.
+ * 
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ *   The article entity.
+ * @param string $url
+ *   The article URL.
+ * 
+ * @return string
+ *   The preliminary news source name.
+ */
+function _news_extractor_get_preliminary_news_source($entity, $url) {
+  // Priority 1: Check if news source is already set from feed processing
+  if ($entity->hasField('field_news_source') && !$entity->get('field_news_source')->isEmpty()) {
+    $news_source = $entity->get('field_news_source')->value;
+    if (!empty($news_source) && $news_source !== 'Source Unavailable') {
+      return $news_source;
+    }
+  }
+  
+  // Priority 2: Extract from URL domain as fallback
+  $parsed_url = parse_url($url);
+  if (!empty($parsed_url['host'])) {
+    $domain = $parsed_url['host'];
+    
+    // Remove www. prefix
+    $domain = preg_replace('/^www\./', '', $domain);
+    
+    // Map common domains to clean news source names
+    $domain_mapping = [
+      'cnn.com' => 'CNN',
+      'politics.cnn.com' => 'CNN',
+      'foxnews.com' => 'Fox News',
+      'reuters.com' => 'Reuters',
+      'bbc.com' => 'BBC News',
+      'bbc.co.uk' => 'BBC News',
+      'nytimes.com' => 'New York Times',
+      'washingtonpost.com' => 'Washington Post',
+      'npr.org' => 'NPR',
+      'theonion.com' => 'TheOnion',
+      'abcnews.go.com' => 'ABC News',
+      'cbsnews.com' => 'CBS News',
+      'nbcnews.com' => 'NBC News',
+      'usatoday.com' => 'USA Today',
+      'wsj.com' => 'Wall Street Journal',
+      'apnews.com' => 'Associated Press',
+      'bloomberg.com' => 'Bloomberg',
+      'politico.com' => 'Politico',
+      'thehill.com' => 'The Hill',
+      'theguardian.com' => 'The Guardian',
+    ];
+    
+    if (isset($domain_mapping[$domain])) {
+      return $domain_mapping[$domain];
+    }
+    
+    // For unmapped domains, create a clean name from the domain
+    $clean_name = ucwords(str_replace(['.com', '.org', '.net', '.co.uk'], '', $domain));
+    return $clean_name;
+  }
+  
+  // Priority 3: Use a default fallback
+  return 'Unknown Source';
+}

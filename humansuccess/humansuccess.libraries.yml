@@ -1,0 +1,129 @@
+dashboard:
+  css:
+    theme:
+      css/dashboard.css: {}
+  js:
+    js/dashboard.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+metrics:
+  css:
+    theme:
+      css/metrics.css: {}
+  js:
+    js/metrics.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/chart
+
+admin:
+  css:
+    theme:
+      css/admin.css: {}
+  js:
+    js/admin.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/drupal.dialog
+
+# H3 Geospatial Mapping Libraries
+h3_mapping:
+  css:
+    theme:
+      css/h3-mapping.css: {}
+  js:
+    js/h3-mapping.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - humansuccess/leaflet
+    - humansuccess/h3_js
+
+# Population Analysis Libraries  
+population_analysis:
+  css:
+    theme:
+      css/population-charts.css: {}
+  js:
+    js/population-charts.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - humansuccess/d3
+    - humansuccess/chart_js
+
+# Time Series Forecasting Charts
+time_series_charts:
+  css:
+    theme:
+      css/forecasting.css: {}
+  js:
+    js/forecasting-charts.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - humansuccess/d3
+    - humansuccess/chart_js
+
+# Quality of Life Analysis
+qol_analysis:
+  css:
+    theme:
+      css/qol-optimization.css: {}
+  js:
+    js/qol-visualization.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - humansuccess/d3
+
+# Real-time Monitoring
+realtime_monitoring:
+  css:
+    theme:
+      css/global-monitoring.css: {}
+  js:
+    js/realtime-monitoring.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - humansuccess/websocket
+
+# Scenario Modeling Interface
+scenario_interface:
+  css:
+    theme:
+      css/forecasting.css: {}
+  js:
+    js/scenario-modeling.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - humansuccess/d3
+
+# External Library Dependencies
+leaflet:
+  js:
+    https://unpkg.com/leaflet@1.9.4/dist/leaflet.js: { type: external, minified: true }
+  css:
+    https://unpkg.com/leaflet@1.9.4/dist/leaflet.css: { type: external, minified: true }
+
+h3_js:
+  js:
+    https://unpkg.com/h3-js@4.1.0/dist/h3-js.umd.js: { type: external, minified: true }
+
+d3:
+  js:
+    https://d3js.org/d3.v7.min.js: { type: external, minified: true }
+
+chart_js:
+  js:
+    https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js: { type: external, minified: true }
+
+websocket:
+  js:
+    js/websocket-client.js: {}

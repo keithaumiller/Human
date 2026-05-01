@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDP Explorer - Economic Indicators Network</title>
+</head>
+<body>
+    <div class="gdp-explorer-container">
+        <div class="header">
+            <h1>GDP Explorer - Economic Indicators Network</h1>
+            <p>Interactive visualization of economic relationships through a comprehensive 4-tier system</p>
+        </div>
+
+        <div class="controls">
+            <div class="controls-left">
+                <div class="control-group">
+                    <label for="viewMode">View Mode:</label>
+                    <select id="viewMode">
+                        <option value="overview">Overview (Core + Supporting)</option>
+                        <option value="focused">Focused View</option>
+                        <option value="all">All Tiers</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="institutionFilter">Filter by Organization:</label>
+                    <select id="institutionFilter">
+                        <option value="">All Organizations</option>
+                        <option value="Bureau of Economic Analysis">Bureau of Economic Analysis</option>
+                        <option value="Federal Reserve">Federal Reserve</option>
+                        <option value="Bureau of Labor Statistics">Bureau of Labor Statistics</option>
+                        <option value="Census Bureau">Census Bureau</option>
+                        <option value="Department of Labor">Department of Labor</option>
+                        <option value="Private Sources">Private Sources</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="strengthSlider">Minimum Relationship Strength: <span id="strengthValue">0.5</span></label>
+                    <input type="range" id="strengthSlider" min="0.1" max="1.0" step="0.1" value="0.5">
+                </div>
+
+                <div class="control-group">
+                    <button id="resetView">Reset View</button>
+                </div>
+            </div>
+
+            <div class="controls-right">
+                <div class="legend">
+                    <h3>Legend</h3>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #A8E6CF;"></span>
+                        <span>Tier 1: Core Economic Indicators</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #C7CEEA;"></span>
+                        <span>Tier 2: Supporting Indicators</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #FFCAB0;"></span>
+                        <span>Tier 3: Foundation Layer</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #F7CAC9;"></span>
+                        <span>Tier 4: Raw Input Data</span>
+                    </div>
+                    <div class="legend-section">
+                        <strong>Relationships:</strong>
+                        <div class="legend-item">
+                            <span style="color: #AEC6CF;">Blue: Positive correlation</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="color: #F7CAC9;">Pink: Negative correlation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="focusIndicator" class="focus-indicator" style="display: none;">
+            <span id="focusInfo">Focused View Active</span>
+        </div>
+
+        <div class="main-content">
+            <div class="chart-container">
+                <svg id="networkChart" width="1400" height="800"></svg>
+            </div>
+        </div>
+
+        <div class="bottom-info-area">
+            <div id="focusIndicator" class="focus-indicator" style="display: none;">
+                <span id="focusInfo">Focused View Active</span>
+            </div>
+
+            <div id="infoPanel" class="info-panel" style="display: none;">
+                <div id="nodeInfo"></div>
+            </div>
+
+            <div id="statusBar" class="status-bar">
+                Overview Mode • Loading data...
+            </div>
+        </div>
+
+        <div id="tooltip" class="tooltip"></div>
+    </div>
+</body>
+</html>

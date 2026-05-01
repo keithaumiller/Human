@@ -1,0 +1,13 @@
+news_extractor.settings:
+  title: 'News Extractor Settings'
+  description: 'Configure the Diffbot API token for News Extractor.'
+  parent: system.admin_config_services
+  route_name: news_extractor.settings
+  weight: 100
+
+news_extractor.daily_limits:
+  title: 'Daily Processing Limits'
+  description: 'Monitor daily article processing limits per news source.'
+  parent: system.admin_reports
+  route_name: news_extractor.daily_limits
+  weight: 100

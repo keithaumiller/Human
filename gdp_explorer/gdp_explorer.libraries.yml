@@ -1,0 +1,9 @@
+gdp_explorer:
+  css:
+    theme:
+      css/gdp-explorer.css: {}
+  js:
+    //d3js.org/d3.v7.min.js: { type: external, minified: true }
+    js/gdp-explorer.js: {}
+  dependencies:
+    - core/drupal

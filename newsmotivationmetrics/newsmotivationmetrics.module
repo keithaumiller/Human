@@ -1,0 +1,235 @@
+<?php
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * @file
+ * News Motivation Metrics module.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function newsmotivationmetrics_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.newsmotivationmetrics':
+      return '<p>' . t('Provides analytics and metrics dashboard for news article motivations and AI analysis.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function newsmotivationmetrics_theme($existing, $type, $theme, $path) {
+  return [
+    'donation_support_block' => [
+      'variables' => [
+        'donation_message' => NULL,
+        'venmo_username' => NULL,
+        'show_venmo_link' => FALSE,
+        'custom_message' => NULL,
+      ],
+      'template' => 'donation-support-block',
+    ],
+    'news_sources_directory' => [
+      'variables' => [
+        'sources' => [],
+        'total_sources' => 0,
+        'total_articles' => 0,
+      ],
+      'template' => 'news-sources-directory',
+    ],
+    'recent_activity_timeline_chart' => [
+      'variables' => [
+        'chart_data' => NULL,
+        'chart_id' => NULL,
+        'config' => NULL,
+        'content' => NULL,
+      ],
+      'template' => 'recent-activity-timeline-chart',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_preprocess_page().
+ * 
+ * DEPRECATED: The standalone /metrics page has been disabled.
+ * Dashboard functionality is now provided via blocks on the front page.
+ */
+/*
+function newsmotivationmetrics_preprocess_page(&$variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  
+  // Apply full-width styling to metrics page.
+  if ($route_name === 'newsmotivationmetrics.public_dashboard') {
+    // Add metrics page class for full-width styling.
+    $variables['attributes']['class'][] = 'page--metrics-fullwidth';
+    
+    // Remove standard content width constraints.
+    $variables['#attached']['library'][] = 'newsmotivationmetrics/fullwidth-override';
+  }
+}
+*/
+
+/**
+ * Implements hook_preprocess_html().
+ * 
+ * DEPRECATED: The standalone /metrics page has been disabled.
+ * Dashboard functionality is now provided via blocks on the front page.
+ */
+/*
+function newsmotivationmetrics_preprocess_html(&$variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  
+  if ($route_name === 'newsmotivationmetrics.public_dashboard') {
+    $variables['attributes']['class'][] = 'metrics-fullwidth-page';
+  }
+}
+*/
+
+/**
+ * Simple redirect handling for legacy /metrics URL.
+ * 
+ * Since the dashboard is now implemented as blocks on the front page,
+ * we redirect any requests to the old /metrics URL to the front page.
+ * 
+ * Note: This is handled at the routing level since the route is disabled.
+ */
+
+/**
+ * Helper function to restore default block configuration.
+ * 
+ * This can be called manually if block placements get lost during deployment.
+ * Usage: drush php:eval "newsmotivationmetrics_restore_block_configuration();"
+ */
+function newsmotivationmetrics_restore_block_configuration() {
+  module_load_include('install', 'newsmotivationmetrics');
+  _newsmotivationmetrics_configure_default_blocks();
+  \Drupal::messenger()->addMessage(t('News Motivation Metrics blocks have been restored to hero region on front page.'));
+}
+
+/**
+ * Helper function to check current block configuration status.
+ * 
+ * Usage: drush php:eval "newsmotivationmetrics_check_block_status();"
+ */
+function newsmotivationmetrics_check_block_status() {
+  $theme = \Drupal::config('system.theme')->get('default');
+  
+  $block_ids = [
+    'metrics_header',
+    'content_analysis_overview',
+    'temporal_processing_analytics',
+    'sentiment_distribution_analysis',
+    'taxonomy_timeline_chart',
+    'entity_recognition_metrics',
+    'recent_activity_metrics',
+    'analysis_quality_metrics',
+    'about_truth_perspective_analytics',
+  ];
+
+  $status_report = [];
+  foreach ($block_ids as $block_id) {
+    $block_machine_name = $theme . '_' . $block_id;
+    $block = \Drupal\block\Entity\Block::load($block_machine_name);
+    
+    if ($block) {
+      $visibility = $block->getVisibility();
+      $front_page_only = isset($visibility['request_path']) && 
+                        $visibility['request_path']['pages'] === '<front>';
+      
+      $status_report[] = [
+        'block' => $block_id,
+        'status' => $block->status() ? 'Enabled' : 'Disabled',
+        'region' => $block->getRegion(),
+        'weight' => $block->getWeight(),
+        'front_page_only' => $front_page_only ? 'Yes' : 'No',
+      ];
+    } else {
+      $status_report[] = [
+        'block' => $block_id,
+        'status' => 'Not Found',
+        'region' => 'N/A',
+        'weight' => 'N/A',
+        'front_page_only' => 'N/A',
+      ];
+    }
+  }
+  
+  // Output status report
+  \Drupal::logger('newsmotivationmetrics')->info('Block Status Report: @report', [
+    '@report' => print_r($status_report, TRUE),
+  ]);
+  
+  if (function_exists('drush_print_table')) {
+    drush_print_table($status_report);
+  } else {
+    foreach ($status_report as $row) {
+      \Drupal::messenger()->addMessage(
+        t('@block: @status in @region (weight: @weight, front page only: @front_page_only)', $row)
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_logger_log_alter().
+ * 
+ * Filter log messages based on configured levels to reduce log noise.
+ */
+function newsmotivationmetrics_logger_log_alter(&$log) {
+  $config = \Drupal::config('thetruthperspective.logging');
+  
+  if (!$config) {
+    return; // No configuration, allow all logging
+  }
+  
+  $channel = $log['channel'] ?? 'default';
+  
+  // Get the configured log level for this channel/module
+  $module_level = $config->get("modules.{$channel}.level");
+  if ($module_level === NULL) {
+    $module_level = $config->get('global.level') ?? 1; // Default to ERROR only
+  }
+  
+  // Map Drupal log levels to our simplified levels
+  $drupal_to_simple_level = [
+    0 => 1, // EMERGENCY -> ERROR
+    1 => 1, // ALERT -> ERROR
+    2 => 1, // CRITICAL -> ERROR
+    3 => 1, // ERROR -> ERROR
+    4 => 2, // WARNING -> WARNING
+    5 => 3, // NOTICE -> INFO
+    6 => 3, // INFO -> INFO
+    7 => 4, // DEBUG -> DEBUG
+  ];
+  
+  $message_level = $drupal_to_simple_level[$log['severity']] ?? 1;
+  
+  // Block the log message if it's above the configured level
+  if ($message_level > $module_level) {
+    $log = NULL; // This prevents the log from being written
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for system_logging_settings.
+ * 
+ * Add a link to our logging configuration form.
+ */
+function newsmotivationmetrics_form_system_logging_settings_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form['thetruthperspective_logging'] = [
+    '#type' => 'fieldset',
+    '#title' => t('The Truth Perspective Logging'),
+    '#weight' => -10,
+  ];
+  
+  $form['thetruthperspective_logging']['info'] = [
+    '#markup' => '<div class="messages messages--info">' .
+      '<strong>Platform-Specific Logging Control:</strong> ' .
+      'The Truth Perspective platform has additional logging controls to reduce log noise. ' .
+      '<a href="/admin/config/development/thetruthperspective/logging">Configure Platform Logging Levels</a>' .
+      '</div>',
+  ];
+}

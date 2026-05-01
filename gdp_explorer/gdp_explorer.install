@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the GDP Explorer module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function gdp_explorer_install() {
+  \Drupal::messenger()->addMessage(t('GDP Explorer module has been installed successfully.'));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function gdp_explorer_uninstall() {
+  \Drupal::messenger()->addMessage(t('GDP Explorer module has been uninstalled.'));
+}

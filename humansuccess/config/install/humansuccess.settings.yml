@@ -1,0 +1,42 @@
+# Default configuration for Human Success module
+
+# Backend API Configuration
+backend_api_url: 'http://localhost:8000/api/v1'
+api_timeout: 30
+api_retry_attempts: 3
+
+# Cache Configuration
+cache_ttl: 86400  # 24 hours default
+cache_settings:
+  h3_data: true
+  population_forecasts: true
+  qol_optimization: true
+  global_trends: true
+  demographic_transitions: true
+
+# Population Forecasting Configuration
+default_forecast_years: 10
+max_forecast_years: 50
+
+# Quality of Life Metric Weights
+qol_metric_weights:
+  education: 0.25
+  healthcare: 0.25
+  economic: 0.20
+  environment: 0.15
+  safety: 0.10
+  governance: 0.05
+
+# H3 Geospatial Configuration
+default_h3_resolution: 6
+max_h3_resolution: 10
+min_h3_resolution: 0
+
+# Monitoring Configuration
+realtime_update_interval: 300  # 5 minutes
+max_monitoring_history: 30     # days
+
+# Performance Settings
+batch_processing_size: 100
+max_concurrent_requests: 5
+memory_limit_mb: 512

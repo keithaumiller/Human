@@ -1,0 +1,7 @@
+name: 'GDP Explorer'
+type: module
+description: 'Interactive GDP Economic Indicators Network Visualization for The Truth Perspective'
+core_version_requirement: ^11
+package: 'The Truth Perspective'
+dependencies:
+  - drupal:system

@@ -1,0 +1,7 @@
+gdp_explorer.overview:
+  path: '/gdp-explorer'
+  defaults:
+    _controller: '\Drupal\gdp_explorer\Controller\GdpExplorerController::overview'
+    _title: 'GDP Explorer - Economic Indicators Network'
+  requirements:
+    _permission: 'access content'

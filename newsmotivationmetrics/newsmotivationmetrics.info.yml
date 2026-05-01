@@ -1,0 +1,13 @@
+name: 'News Motivation Metrics'
+type: module
+description: 'Analytics and metrics dashboard for news article motivations and AI analysis'
+core_version_requirement: ^11
+package: 'The Truth Perspective'
+dependencies:
+  - drupal:taxonomy
+  - drupal:views
+  - drupal:node
+  - drupal:block
+
+# Configure blocks automatically during installation
+# Blocks are placed in hero region and visible on front page only
